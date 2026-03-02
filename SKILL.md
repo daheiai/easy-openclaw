@@ -188,6 +188,9 @@ cd ~/.openclaw && unzip -o <文件名> -d ~/.openclaw/
 - 若用户回复“跳过第三层”，记录后进入第 4 轮
 - 若用户点名安装某个 Skill：立即执行安装链路（读取 README 安装段落 -> 原样执行 -> 最小验证 -> 回报结果）
 - 对“awesome/合集”类仓库默认先抓取并输出聚合摘要（精选 6 条）；用户明确要求“继续展开”再做分类扩展
+- 若安装“大黑AI日报”：必须补齐 `delivery.mode=announce`、`delivery.channel=<当前会话渠道>`、`delivery.to=<当前窗口目标ID>`；`delivery.to` 为空时只能报“待修复”，不能报“安装成功”
+- 若安装“大黑AI日报”：安装后必须立刻手动触发一次日报，且先向用户输出一条“测试消息/即时触发”再验证“当前窗口已收到消息”
+- 若安装“大黑AI日报”：只有在用户确认收到测试消息后，才可宣告安装完成并开启定时调度
 
 ---
 
@@ -648,6 +651,13 @@ openclaw sandbox explain
   - 检查容器内 `/etc/searxng/settings.yml` 的 `search.formats` 是否包含 `json`
   - 修复后重启 `searxng` 容器，再次执行本地 JSON 连通性测试
 - 若 SearXNG 连通性失败：提示切换 `searx.space` 备用实例或暂时回退到现有 `web_search` 提供商
+
+若第 3 轮安装了“大黑AI日报”，额外验证：
+- 已写入 `delivery.mode=announce`
+- 已写入 `delivery.channel` 且与当前会话渠道一致
+- 已写入 `delivery.to`（禁止为空）
+- 手动触发一次日报后，当前窗口可收到“测试消息/即时触发”标记的测试消息；否则标记为“待修复”
+- 用户确认收到测试消息后，才可进入“定时调度已启用”状态
 
 若第 12 项开启（新增渠道接入），额外验证：
 - 执行 `openclaw channels status --probe`

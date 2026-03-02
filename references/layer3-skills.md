@@ -38,7 +38,23 @@
 - 核心能力：抓取 RSS 最新 AI 资讯并整理推送。
 - 调度规则：固定从 `00:05` 开始，每 4 小时一次（`00:05 / 04:05 / 08:05 / 12:05 / 16:05 / 20:05`）。
 - 推荐 cron：`5 */4 * * *`
+- 投递规则（强制）：
+  - `delivery.mode` 固定为 `announce`
+  - `delivery.channel` 必须与当前会话渠道一致（`discord` / `telegram` / `feishu`）
+  - `delivery.to` 必填，且必须指向“当前对话窗口”的目标 ID；缺失时禁止宣告安装成功
+  - 渠道映射优先级：
+    - Discord：优先当前会话 `channelId`（如 `conversation_label`）作为 `delivery.to`
+    - Telegram：优先当前会话 `chat_id`；若无 `chat_id` 则回退 `sender_id`
+    - Feishu：优先当前会话 `chat_id`；若仅有单聊上下文则回退 `open_id`
 - 执行动作（固定）：直接告知 OpenClaw 按上述固定时刻抓取 RSS、去重、摘要并推送；优先使用 OpenClaw 内部定时触发器，不额外要求用户编写程序。
+- 执行顺序（强制）：
+  - 第一步：先手动触发一次“即时日报”并投递到当前窗口（不是等定时）
+  - 第二步：让用户确认“当前窗口已收到测试消息”
+  - 第三步：确认后再启用固定时刻调度（`00:05` 起每 4 小时）
+- 安装后验收（强制）：
+  - 先输出解析到的 `delivery.channel` 与 `delivery.to`
+  - 立即执行一次“手动触发日报”测试，并在消息中显式标注“测试消息/即时触发”
+  - 若当前窗口未收到测试消息，则标记为“未完成”，并进入投递目标修复分流（先修 `delivery.to` 再重试）
 
 ### 5) Awesome OpenClaw Usecases（聚合数据源 A）
 
