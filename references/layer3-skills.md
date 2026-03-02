@@ -8,7 +8,7 @@
 - 清单末尾只保留一个选项：`跳过第三层`。
 - 用户点名要安装某个 Skill 时，立即执行该 Skill 的安装流程，不再回到“仅推荐”。
 - 安装流程固定为：读取仓库 README 安装段落 -> 原样执行安装命令 -> 执行最小可用验证 -> 汇报结果。
-- 对 awesome 合集类仓库，不直接甩链接；默认先抓取仓库并输出一屏精选摘要（默认 6 条），用户再决定是否继续展开或安装。
+- 对“更多 Skills 扩展入口”，默认只展示双仓链接，不自动抓取摘要。
 
 ## 当前推荐清单（可执行）
 
@@ -56,18 +56,10 @@
   - 立即执行一次“手动触发日报”测试，并在消息中显式标注“测试消息/即时触发”
   - 若当前窗口未收到测试消息，则标记为“未完成”，并进入投递目标修复分流（先修 `delivery.to` 再重试）
 
-### 5) Awesome OpenClaw Usecases（聚合数据源 A）
+### 5) 更多 Skills 扩展（手动探索）
 
-- 仓库：`https://github.com/hesamsheikh/awesome-openclaw-usecases`
-- 用途：补充“场景和用例”类候选项，供第 3 轮聚合摘要使用。
-
-### 6) Awesome OpenClaw Skills（聚合数据源 B）
-
-- 仓库：`https://github.com/VoltAgent/awesome-openclaw-skills`
-- 用途：补充“技能和实现”类候选项，供第 3 轮聚合摘要使用。
-
-## Awesome 合集默认输出规则（固定）
-
-- 默认动作：同时抓取 5/6 两个仓库，合并后输出“精选 6 条”。
-- 每条输出格式固定：`名称 + 一句话能力 + 适用场景 + 是否建议立即安装`。
-- 用户若回复“继续展开”，再按分类继续给下一批；用户若点名安装，立即进入安装流程。
+- 用途：当用户需要更多灵感或更多可选 Skill 时，提供扩展入口。
+- 仓库 A（Usecases）：`https://github.com/hesamsheikh/awesome-openclaw-usecases`
+- 仓库 B（Skills）：`https://github.com/VoltAgent/awesome-openclaw-skills`
+- 默认动作：仅展示入口链接，提示用户“可手动访问查看更多”。
+- 若用户明确要求“帮我展开总结”，再对仓库内容做抓取与分类整理。

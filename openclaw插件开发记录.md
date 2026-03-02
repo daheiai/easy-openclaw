@@ -39,7 +39,7 @@
 - 第 3 轮默认直接展示推荐清单，不再使用“11 开”子菜单
 - 支持“跳过第三层”
 - 用户点名 Skill 后立即执行安装链路（README 安装段落 -> 执行 -> 最小验证）
-- awesome 合集默认先抓取并输出精选摘要，再按用户意图继续展开/安装
+- “更多 Skills 扩展入口”默认仅展示双仓链接，按需再展开总结
 
 交互节奏：
 - Step 0：备份/恢复
@@ -118,7 +118,7 @@
 
 ### 已完成
 - 将 `references/configs.md` 重构为“1 个总览 + 5 个子文件”，降低单文件复杂度。
-- 第三层 Skills 推荐已改为可执行：支持点名即安装，且默认聚合抓取 awesome 双仓并输出精选摘要。
+- 第三层 Skills 推荐已改为可执行：支持点名即安装；“更多 Skills 扩展入口”默认给双仓链接，按需再展开总结。
 - 调整 Discord 渠道增强提问顺序：`6 免 @`、`7 审批转发`，并移除“多 Agent”项（避免与第 4 轮新增渠道语义重叠）。
 - 优化 Discord `guildId` 获取逻辑：
   - 默认路径改为 `channelId -> GET /channels/<channelId> -> guild_id`；
@@ -161,7 +161,7 @@
 
 ### 下次可直接续做
 - 补齐 Telegram 审批联动端到端实测记录（含 `/approve` 成功与失败分流）。
-- 持续维护第三层 Skills 推荐清单（当前 6 个条目，含 2 个 awesome 聚合数据源）。
+- 持续维护第三层 Skills 推荐清单（当前 5 个条目，含 1 个“更多 Skills 扩展入口”）。
 - 细化联网搜索可写配置键和 Feishu 自动验收项。
 
 ---
@@ -182,13 +182,9 @@
 ## TODO（待完成）
 
 1. Telegram 审批联动：补齐端到端实测结论（`pairing -> 审批消息 -> /approve`）。
-2. Skills 推荐层：维护当前 6 个条目（含 2 个 awesome 聚合数据源），持续优化“先摘要后展开”的推荐质量。
-3. Skills 推荐层实测：补齐 Youtube Clipper / TTS / RedBookSkills / 大黑AI日报 的端到端安装与验收记录。
-4. 大黑AI日报实测：验证固定时刻调度（`00:05` 起每 4 小时）在目标环境持续稳定触发，并验证 `delivery.to` 自动映射当前窗口（Discord/Telegram/Feishu）后可正常投递。
-5. 联网搜索配置：补一条“本地 SearXNG 连通性自动验收”的快捷检查模板（便于每轮测试复用）。
-6. Feishu 24h 缓存优化：补一条“已改造成功”的自动验收检查项（便于测试时快速确认）。
-7. 渠道审批联动补齐：按需为 Discord / Feishu / Telegram 配置 `execApprovals`，并完成 `/approve` 实测闭环。
-8. （可选）回归测试脚本：如后续测试规模扩大，再补自动化检查。
+2. Skills 实装验收：补齐 TTS / RedBookSkills 的端到端安装与验收记录。
+3. Feishu 24h 缓存优化：补一条“已改造成功”的自动验收检查项（便于测试时快速确认）。
+4. 三渠道审批联动闭环：为 Discord / Feishu / Telegram 配置 `execApprovals` 并完成 `/approve` 实测闭环。
 
 ---
 
