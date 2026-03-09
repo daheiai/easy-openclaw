@@ -138,7 +138,7 @@ cd ~/.openclaw && unzip -o <文件名> -d ~/.openclaw/
 >
 > A. 你当前主要使用哪个渠道？（单选：`discord` / `feishu` / `telegram` / `tui`）
 > 1. 流式消息：消息边生成边发送（推荐开）
-> 2. 记忆功能：上下文接近上限时自动写入本地记忆并启用检索（推荐开，首次会下载约 329MB 本地 embedding 模型）
+> 2. 记忆功能：上下文接近上限时自动写入本地记忆（推荐开，保留强制刷新）
 > 3. 消息回执：Agent 收到消息先给出 emoji 回执（推荐开）
 > 4. 联网搜索：优先使用正文提取服务（`defuddle -> r.jina.ai`），必要时用隔离浏览器抓取页面（推荐开）
 > 5. 权限模式（可选）：默认维持现状 `coding`；也可切到 `full`（完全开放）或 `minimal`（最小安全）
@@ -427,11 +427,7 @@ cd ~/.openclaw && zip -r backup-$(date +%Y%m%d-%H%M%S).zip openclaw.json workspa
 - 记忆功能
   - `agents.defaults.compaction.memoryFlush.enabled: true`
   - `agents.defaults.compaction.memoryFlush.softThresholdTokens: 40000`
-  - `agents.defaults.memorySearch.enabled: true`
-  - `agents.defaults.memorySearch.provider: "local"`
-  - `agents.defaults.memorySearch.local.modelPath: "hf:ggml-org/embeddinggemma-300m-qat-q8_0-GGUF/embeddinggemma-300m-qat-Q8_0.gguf"`
-  - `agents.defaults.memorySearch.fallback: "none"`
-  - 执行前向用户提示：首次索引/检索会自动下载约 329MB 模型文件
+  - 不再主动写 `agents.defaults.memorySearch.*`，交由 OpenClaw 新版默认向量记忆能力处理
 - 消息回执
   - `messages.ackReactionScope: "all"`
 - 联网搜索（若第 4 项开启）
@@ -654,9 +650,9 @@ openclaw config get tools.profile
 - 未完成前只能汇报“配置已写入，等待配对码”，不能汇报“Telegram 接入成功”
 
 若第 2 项开启（记忆功能），额外验证：
-- 执行 `openclaw memory status --deep`
-- 期望看到 `Provider: local`
-- 期望看到 `Model: hf:ggml-org/embeddinggemma-300m-qat-q8_0-GGUF/embeddinggemma-300m-qat-Q8_0.gguf`
+- 检查 `openclaw.json` 中 `agents.defaults.compaction.memoryFlush.enabled=true`
+- 检查 `openclaw.json` 中 `agents.defaults.compaction.memoryFlush.softThresholdTokens=40000`
+- 不再强制校验 `memorySearch.provider/modelPath`
 
 若第 4 项开启（联网搜索），额外验证：
 - 期望 `openclaw config get browser.defaultProfile` 返回 `openclaw`

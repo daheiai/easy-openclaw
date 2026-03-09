@@ -79,11 +79,9 @@
 - 修改 `~/.openclaw/extensions/feishu/src/probe.ts`
 - 探测结果按 `appId + domain` 做 24h 缓存
 
-### 5) 记忆功能（本地模型）
-- 启用记忆时默认配置本地 embedding 模型：
-  `hf:ggml-org/embeddinggemma-300m-qat-q8_0-GGUF/embeddinggemma-300m-qat-Q8_0.gguf`
-- 默认 `fallback=none`，保持纯本地模式
-- 首次使用会自动下载约 329MB 模型文件
+### 5) 记忆功能（仅保留强制刷新）
+- 新版 OpenClaw 已内置向量记忆能力，不再主动改 `memorySearch/provider/modelPath`
+- 仅保留 `memoryFlush.enabled=true` 与 `softThresholdTokens=40000` 这组强制刷新配置
 ### 6) Docker 兼容规则
 - 若环境无 Docker，不要使用 `sandbox.mode = "all"`
 - 遇到 `spawn docker ENOENT`，应回退为 `sandbox.mode = "off"`

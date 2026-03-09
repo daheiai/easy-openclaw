@@ -41,7 +41,7 @@ cd ~/.openclaw && zip -r backup-$(date +%Y%m%d-%H%M%S).zip openclaw.json workspa
 }
 ```
 
-## 2) 记忆功能（本地 embedding）
+## 2) 记忆功能（仅保留强制刷新）
 
 ```json
 "agents": {
@@ -51,14 +51,6 @@ cd ~/.openclaw && zip -r backup-$(date +%Y%m%d-%H%M%S).zip openclaw.json workspa
         "enabled": true,
         "softThresholdTokens": 40000
       }
-    },
-    "memorySearch": {
-      "enabled": true,
-      "provider": "local",
-      "local": {
-        "modelPath": "hf:ggml-org/embeddinggemma-300m-qat-q8_0-GGUF/embeddinggemma-300m-qat-Q8_0.gguf"
-      },
-      "fallback": "none"
     }
   }
 }
@@ -66,7 +58,7 @@ cd ~/.openclaw && zip -r backup-$(date +%Y%m%d-%H%M%S).zip openclaw.json workspa
 
 注意：
 - `compaction` 必须深度合并，保留原有字段。
-- 首次执行 memory index/search 时会自动下载约 329MB 本地模型文件。
+- 不再主动写 `memorySearch`、`provider`、`modelPath` 等向量检索配置，交由 OpenClaw 新版默认能力接管。
 
 ## 3) 消息回执
 

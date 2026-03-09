@@ -93,15 +93,16 @@ curl -s "https://discord.com/api/v10/guilds/<guildId>/channels" -H "Authorizatio
 - 禁止先让用户手工复制服务器 ID
 - 禁止尝试 `/debug/*`、`/api/*`、`/guilds/<channelId>`
 
-## 记忆功能验证（本地模型）
+## 记忆功能验证（强制刷新）
 
 ```bash
 openclaw memory status --deep
 ```
 
 期望：
-- `Provider: local`
-- `Model: hf:ggml-org/embeddinggemma-300m-qat-q8_0-GGUF/embeddinggemma-300m-qat-Q8_0.gguf`
+- `memoryFlush.enabled=true`
+- `softThresholdTokens=40000`
+- 不再要求额外校验 `Provider/Model`
 
 ## 联网搜索验证（defuddle + r.jina.ai + openclaw browser）
 
