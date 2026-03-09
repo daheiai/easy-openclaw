@@ -78,19 +78,12 @@ cd ~/.openclaw && zip -r backup-$(date +%Y%m%d-%H%M%S).zip openclaw.json workspa
 
 ## 4) 联网搜索
 
-目标：不给用户强绑 Brave API，优先使用本地可控搜索，再用隔离浏览器兜底抓取页面内容。
+目标：不给用户强绑 Brave API，也不要求本地部署搜索服务；优先用网页正文读取服务，再用隔离浏览器兜底抓取页面内容。
 
 推荐策略（按优先级）：
-1) 本地 SearXNG（推荐，开箱后免费可用）
-2) `searx.space` 公共实例（本地安装失败/暂不想部署时）
+1) `https://defuddle.md/https://目标网址`（主力正文提取）
+2) `https://r.jina.ai/http://目标网址`（备用正文提取）
 3) 浏览器隔离抓取兜底（`browser.defaultProfile="openclaw"`）
-
-官方安装文档：
-- `https://docs.searxng.org/admin/installation-searxng.html`
-
-公共实例入口（备用）：
-- `https://searx.space/`
-- 说明：页面由 JS 渲染实例列表，优先选择在线、延迟低、稳定的 HTTPS 实例
 
 `openclaw.json` 建议写入（浏览器兜底）：
 
@@ -104,54 +97,55 @@ cd ~/.openclaw && zip -r backup-$(date +%Y%m%d-%H%M%S).zip openclaw.json workspa
 说明：
 - `defaultProfile: "chrome"` 会走扩展 relay 和用户日常浏览器上下文，不适合作为默认自动化通道。
 - `defaultProfile: "openclaw"` 使用 OpenClaw 托管隔离 profile，更安全也更符合开箱路径。
+- 若环境是 Docker 容器、无桌面 VPS、纯命令行虚拟机等无图形界面场景，浏览器兜底可能不可用；此时只依赖前两层正文提取。
 
 写入 `~/.openclaw/workspace/TOOLS.md`（告知 agent 的操作偏好）：
 
 ```markdown
 ## 搜索服务（默认）
-- 优先使用 SearXNG，不用 Brave API 或其他付费接口。
-- 默认地址：`http://127.0.0.1:8081/search?q=关键词&format=json`
-- 若本地实例不可用，改用 `https://searx.space/` 中可用实例，替换基础地址后再检索。
-- 工作流：先检索（SearXNG JSON）-> 再整理答案；必要时再用 `browser`（profile=`openclaw`）打开网页并 snapshot。
+- 默认不部署本地搜索服务，也不强依赖 Brave API。
+- 第 1 优先：`https://defuddle.md/https://目标网址`
+- 第 2 优先：`https://r.jina.ai/http://目标网址`
+- 第 3 优先：若前两者失败，再用 `browser`（profile=`openclaw`）打开网页并 snapshot。
+- 若环境无图形界面，浏览器兜底可能不可用，不作为联网搜索成功前提。
 ```
 
-本地部署注意（强制检查）：
-- 推荐端口映射：`-p 8081:8080`（避免宿主机 `8080` 已被其他服务占用）
-- 若 `format=json` 返回 403，而不带 `format` 的页面返回 200：通常是 `search.formats` 未包含 `json`
-- 需要确保 SearXNG 的 `settings.yml` 中 `search.formats` 至少包含 `html` 和 `json`
-
-SearXNG 连通性检查：
+正文提取连通性检查：
 
 ```bash
-curl -s "http://127.0.0.1:8081/search?q=openclaw&format=json" | jq '.results | length'
+curl -L -s "https://defuddle.md/https://example.com" | head
+curl -L -s "https://r.jina.ai/http://example.com" | head
 ```
 
-若使用公共实例，将地址替换为对应实例 URL（保留 `search?...&format=json` 结构）。
+## 5) 权限模式（可选）
 
-## 5) 安全收紧（可选）
+目标：不再默认只做“安全收紧”，而是先探测当前 OpenClaw 权限状态，再由用户选择要维持现状、完全开放，还是最小安全。
 
-已实测可生效的“收紧版”至少需要两层：`openclaw.json` 执行策略 + `exec-approvals.json` 默认策略。  
-若希望在聊天渠道内接收审批并 `/approve`，需在第二层开启对应渠道联动（Discord 第 7 项 / Telegram 第 9 项）。
+推荐顺序：
+1) 维持现状（默认，推荐）
+2) 完全开放（`full`，高风险）
+3) 最小安全（`minimal` + 沙箱，最严格）
 
-`openclaw.json`（核心约束）：
+探测命令（固定）：
+
+```bash
+openclaw config get tools.profile
+openclaw config get agents.defaults.sandbox.mode
+command -v docker || echo docker_missing
+```
+
+判定：
+- 若当前是 `tools.profile="coding"`：可直接继续执行本 skill，大多数基础功能不受影响。
+- 若当前是 `tools.profile="minimal"` 或其他明显受限状态：先提示用户手动执行 `openclaw config set tools.profile coding`，再继续本 skill。
+- 若当前已是 `tools.profile="full"`：说明环境处于完全放开模式，应额外提醒用户风险。
+
+### A. 维持现状（默认）
+
+推荐给大多数用户：
 
 ```json
-"approvals": {
-  "exec": {
-    "enabled": true,
-    "mode": "session",
-    "sessionFilter": ["discord", "telegram", "feishu"]
-  }
-},
 "tools": {
-  "elevated": {
-    "enabled": false
-  },
-  "exec": {
-    "host": "gateway",
-    "security": "allowlist",
-    "ask": "always"
-  }
+  "profile": "coding"
 },
 "agents": {
   "defaults": {
@@ -161,6 +155,70 @@ curl -s "http://127.0.0.1:8081/search?q=openclaw&format=json" | jq '.results | l
   }
 }
 ```
+
+说明：
+- `coding` 适合当前这套 skill 的原生体验。
+- 能读写配置、执行常规命令、完成大部分自动化修改。
+- 默认不额外改动用户现有权限配置；若探测到已是 `coding`，可直接维持。
+
+若当前权限太低，提示用户执行：
+
+```bash
+openclaw config set tools.profile coding
+```
+
+### B. 完全开放（`full`，高风险）
+
+适用场景：追求“贾维斯狂奔模式”，希望 agent 尽量少受限制。
+
+```json
+"tools": {
+  "profile": "full"
+},
+"agents": {
+  "defaults": {
+    "sandbox": {
+      "mode": "off"
+    }
+  }
+}
+```
+
+强提醒：
+- 这是完全放开模式，风险最高。
+- 不建议在生产环境、主力电脑、重要账号环境下长期启用。
+- 必须明确提醒用户：当前 agent 的执行自由度明显更高。
+
+### C. 最小安全（`minimal` + 沙箱）
+
+适用场景：把 OpenClaw 尽量收回到“偏聊天机器人”的状态。
+
+```json
+"tools": {
+  "profile": "minimal"
+},
+"agents": {
+  "defaults": {
+    "sandbox": {
+      "mode": "all"
+    }
+  }
+}
+```
+
+关键前提：
+- 只有系统已安装 Docker，才允许写入 `sandbox.mode="all"`。
+- 若未安装 Docker，直接开启沙箱会导致 agent 启动失败，并出现 `Sandbox mode requires Docker` / `docker command was not found in PATH`。
+
+处理规则：
+- 若用户选择最小安全，先检查 `docker` 是否可用。
+- 若 `docker` 缺失：先提示安装 Docker；安装前不得宣告“最小安全模式已完成”。
+- 若环境可自动修复（如 Debian/Ubuntu 且有 `sudo`）：可在用户同意后先安装 Docker。
+- 若无法自动修复：明确告知用户先装 Docker，随后再开启 `minimal + sandbox`。
+
+### 审批联动（仅最小安全模式相关）
+
+若用户明确要“最小安全 + 审批联动”，使用以下默认策略：
 
 `exec-approvals.json` 默认策略：
 
@@ -190,4 +248,4 @@ printf '%s' '{"version":1,"socket":{},"defaults":{"security":"allowlist","ask":"
 
 注意：
 - OpenClaw `2026.2.24` 下，`tools.exec.askFallback` 不是合法键，`askFallback` 要放在 `exec-approvals.json`。
-- 若设置 `agents.defaults.sandbox.mode: "all"` 但系统未安装 Docker，会报 `spawn docker ENOENT`；此时改回 `"off"` 并重启 Gateway。
+- 若启用 `sandbox.mode="all"` 后出现 `spawn docker ENOENT` 或 `Sandbox mode requires Docker`，应立即改回 `"off"` 并重启 Gateway。

@@ -35,18 +35,21 @@ launchctl stop ai.openclaw.gateway && sleep 2 && launchctl start ai.openclaw.gat
 systemctl restart openclaw-gateway
 ```
 
-## 安全收紧生效验证
+## 权限模式生效验证
 
 ```bash
 openclaw security audit --deep
 openclaw approvals get --json
 openclaw sandbox explain
+openclaw config get tools.profile
 ```
 
 关键检查：
-- `tools.elevated: disabled`
-- approvals defaults 中：`ask=always`、`askFallback=deny`、`security=allowlist`
-- 若日志出现 `spawn docker ENOENT`，将 `agents.defaults.sandbox.mode` 改回 `"off"` 并重启
+- 维持现状：`tools.profile` 应保持 `coding`（或用户原本的可执行状态）
+- 完全开放：`tools.profile=full` 且 `sandbox.mode=off`
+- 最小安全：`tools.profile=minimal`
+- 最小安全 + 审批联动：approvals defaults 中应看到 `ask=always`、`askFallback=deny`、`security=allowlist`
+- 若日志出现 `spawn docker ENOENT` 或 `Sandbox mode requires Docker`，将 `agents.defaults.sandbox.mode` 改回 `"off"` 并重启
 
 ## Discord 无响应排查（免 @ 场景）
 
@@ -100,7 +103,7 @@ openclaw memory status --deep
 - `Provider: local`
 - `Model: hf:ggml-org/embeddinggemma-300m-qat-q8_0-GGUF/embeddinggemma-300m-qat-Q8_0.gguf`
 
-## 联网搜索验证（SearXNG + openclaw browser）
+## 联网搜索验证（defuddle + r.jina.ai + openclaw browser）
 
 先确认浏览器默认 profile：
 
@@ -111,22 +114,21 @@ openclaw config get browser.defaultProfile
 期望：
 - 返回 `openclaw`
 
-再做 SearXNG 连通性检查（本地优先）：
+再做正文提取连通性检查：
 
 ```bash
-curl -s "http://127.0.0.1:8081/search?q=openclaw&format=json" | jq '.results | length'
+curl -L -s "https://defuddle.md/https://example.com" | head
+curl -L -s "https://r.jina.ai/http://example.com" | head
 ```
 
-若本地未部署或暂时不可用：
-- 从 `https://searx.space/` 选择可用实例
-- 将上面的地址替换为实例地址后重试（保留 `search?...&format=json`）
-
-若本地部署后仍失败，优先检查：
-- 宿主机端口冲突：确认 `8081` 映射到容器 `8080`，不要默认占用 `8080`
-- JSON 未启用：若 `curl "http://127.0.0.1:8081/search?q=openclaw"` 返回 200，但 `format=json` 返回 403，检查 `settings.yml` 的 `search.formats` 是否包含 `json`
+判定：
+- `defuddle` 成功：优先正文提取链路可用
+- `r.jina.ai` 成功：备用正文提取链路可用
+- 若两者都失败，再尝试浏览器兜底
 
 同时检查 `~/.openclaw/workspace/TOOLS.md`：
-- 是否写明“先 SearXNG，再 browser(profile=openclaw) snapshot”的顺序
+- 是否写明“先 defuddle，再 r.jina.ai，最后 browser(profile=openclaw) snapshot”的顺序
+- 是否写明“无图形界面环境下浏览器兜底可能不可用”
 
 ## 常见坑
 
@@ -136,5 +138,5 @@ curl -s "http://127.0.0.1:8081/search?q=openclaw&format=json" | jq '.results | l
 - `agentId` 大小写不一致导致路由错乱
 - 修改后未重启 Gateway 导致看起来“配置不生效”
 - 误把 Discord 频道重连当成 Gateway 全量重启
-- SearXNG 使用 `8080` 与现有服务冲突，导致“看似已部署但请求打到其他服务”
-- SearXNG 仅开放 `html` 格式，导致 `format=json` 长期 403
+- 目标站点存在登录墙、Cloudflare 或 403 防护，导致 `defuddle` / `r.jina.ai` 都失败
+- Docker / VPS / 无桌面环境缺少图形界面，导致浏览器兜底不可用

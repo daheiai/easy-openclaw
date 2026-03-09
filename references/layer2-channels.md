@@ -80,7 +80,7 @@
 
 ## 7) Discord 审批转发联动
 
-适用场景：已开启“安全收紧”后，希望在 Discord 内直接接收审批并 `/approve`。
+适用场景：已选择“最小安全 + 审批联动”后，希望在 Discord 内直接接收审批并 `/approve`。
 
 ```json
 "channels": {
@@ -193,7 +193,7 @@ export { PROBE_CACHE_TTL_MS };
 
 ## 9) Telegram 审批联动（可执行）
 
-适用场景：已开启第 1 层第 5 项“安全收紧”，希望在 Telegram 内收到审批消息并使用 `/approve` 完成批准。
+适用场景：已开启第 1 层第 5 项“最小安全 + 审批联动”，希望在 Telegram 内收到审批消息并使用 `/approve` 完成批准。
 
 推荐写法（最小可用）：
 

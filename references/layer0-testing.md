@@ -48,10 +48,10 @@ echo "before=${BEFORE_PID:-none} after=${AFTER_PID:-none}"
 ## 功能验收观测
 
 至少输出本轮已开启项的验收结论：
-- 安全收紧：`openclaw security audit --deep` + `openclaw approvals get --json`
+- 权限模式：`openclaw security audit --deep` + `openclaw approvals get --json`（若选择最小安全 + 审批联动）
 - 渠道健康：`openclaw channels status --probe`
 - 记忆功能：`openclaw memory status --deep`（若已开启）
-- 联网搜索：SearXNG 连通性检查（若已开启）
+- 联网搜索：正文提取链路检查（`defuddle -> r.jina.ai -> browser`，若已开启）
 - 审批联动：触发一次审批并回传 `/approve` 结果（若已开启）
 
 ## 收尾输出（测试版）
