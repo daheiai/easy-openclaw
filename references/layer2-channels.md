@@ -78,9 +78,13 @@
 }
 ```
 
-## 7) Discord 审批转发联动
+## 7) Discord 审批按钮（可选）
 
-适用场景：已选择“最小安全 + 审批联动”后，希望在 Discord 内直接接收审批并 `/approve`。
+适用场景：已启用第 1 层第 5 项带 `+审批`（`coding/full` 下的 exec 高危操作审批）后，希望在 Discord 内用按钮完成审批。
+
+前提（强制）：
+- 审批提示必须先能投递到 Discord：在第 1 层权限模式中，将 `approvals.exec.mode` 设为 `session`（并在 Discord 会话触发）或 `targets/both`（包含 `{"channel":"discord","to":"user:<id>"}` / `{"channel":"discord","to":"channel:<id>"}`）。
+- 本段配置只影响“在 Discord 内以按钮形式审批”，不负责“审批提示投递到哪里”。
 
 ```json
 "channels": {
@@ -191,42 +195,10 @@ export { PROBE_CACHE_TTL_MS };
 
 若文件不存在：提示用户插件路径缺失并跳过该项，不中断其他配置。
 
-## 9) Telegram 审批联动（可执行）
+## 9) Telegram（本层暂无渠道增强项）
 
-适用场景：已开启第 1 层第 5 项“最小安全 + 审批联动”，希望在 Telegram 内收到审批消息并使用 `/approve` 完成批准。
+Telegram 的“审批提示投递 / `/approve`”属于 **exec 审批系统**，推荐在第 1 层权限模式里统一配置：
+- `~/.openclaw/openclaw.json`：`approvals.exec`（`mode=session/targets/both` + `targets`）
+- `~/.openclaw/exec-approvals.json`：`security=allowlist + ask=on-miss` 策略与 allowlist
 
-推荐写法（最小可用）：
-
-```json
-"channels": {
-  "telegram": {
-    "execApprovals": {
-      "enabled": true,
-      "approvers": ["<telegramUserId>"],
-      "target": "both",
-      "agentFilter": ["main"],
-      "sessionFilter": ["telegram"]
-    },
-    "dmPolicy": "allowlist",
-    "allowFrom": ["<telegramUserId>"]
-  }
-}
-```
-
-执行要点：
-- 优先从当前 Telegram 会话元数据读取 `sender_id` 作为 `<telegramUserId>`；若无法提取，再询问用户提供。
-- 若当前还未完成配对，可先用 `dmPolicy="pairing"` 完成首轮接入，后续再切到 `allowlist`。
-- 若用户回传配对码，执行：`openclaw pairing approve telegram <pairingCode>`。
-- `allowFrom` 必须做追加去重，不覆盖已有白名单。
-- 若仅需 DM 批准，不必额外放开群组策略。
-
-验证步骤：
-
-```bash
-openclaw channels status --probe
-```
-
-判定：
-- Telegram 显示 `enabled/configured/running/works`
-- 在 Telegram 触发一次需审批命令后，能收到审批消息
-- 回复 `/approve <id> allow-once` 后命令继续执行
+建议优先参考：`references/layer1-base.md` 中的“Exec 高危操作审批（可选，仅 coding/full 有效）”。

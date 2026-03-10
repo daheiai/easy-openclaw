@@ -16,15 +16,15 @@
 
 1. 基础体验优化
 - 流式输出（回答边生成边显示）
-- 记忆功能（上下文更连贯）
+- 记忆功能（记忆增强；可选每天归档）
 - 消息回执（已读反馈）
 - 联网搜索（`defuddle` 优先，`r.jina.ai` 备用）
 - 权限模式（默认 coding，也可切 full / minimal）
 
 2. 渠道专项优化
-- Discord：频道免 @ 响应、审批联动
+- Discord：频道免 @ 响应、审批按钮（可选，需开启 `+审批`）
 - Feishu：探测 24h 缓存优化（降低额度消耗）
-- Telegram：审批联动（支持 `/approve`）
+- Telegram：本层暂无专项增强（审批提示投递见第 1 层权限模式的 `approvals.exec`）
 
 3. Skills 推荐与安装
 - 默认直接展示推荐清单
@@ -65,4 +65,4 @@
 
 主流程已可用，适合直接测试。
 
-当前主要剩余项是实测闭环（Telegram 审批、TTS/RedBook 实装验收、Feishu 缓存验收、三渠道审批闭环）。
+当前主要剩余项是实测闭环（exec 审批：`approvals.exec` 投递 + `/approve`；TTS/RedBook 实装验收；Feishu 缓存验收）。

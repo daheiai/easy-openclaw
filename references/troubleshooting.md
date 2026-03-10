@@ -48,8 +48,9 @@ openclaw config get tools.profile
 - 维持现状：`tools.profile` 应保持 `coding`（或用户原本的可执行状态）
 - 完全开放：`tools.profile=full` 且 `sandbox.mode=off`
 - 最小安全：`tools.profile=minimal`；此模式接近聊天机器人，很多目录读取/文件操作会被限制
-- 审批测试默认建议：保持 `tools.profile=coding`，再验证高风险动作是否能触发审批
-- 最小安全 + 审批联动：approvals defaults 中应看到 `ask=always`、`askFallback=deny`、`security=allowlist`
+- 审批测试默认建议：保持 `tools.profile=coding`，但不要直接拿“删除文件是否弹窗”当唯一判据
+- `minimal` 下 `exec` 往往不可用，因此审批机制也没有触发机会；若目标是“可执行 + 可审批”，保持 `coding` 或 `full` 再启用审批
+- 若要测 `exec` 审批，启用 `exec-approvals.json` 的 `security=allowlist + ask=on-miss`，并执行一个“不在 allowlist 中”的命令来触发审批；若会话仍是宿主机默认 full access，命令可能直接执行，不会进入审批
 - 若日志出现 `spawn docker ENOENT` 或 `Sandbox mode requires Docker`，将 `agents.defaults.sandbox.mode` 改回 `"off"` 并重启
 
 ## Discord 无响应排查（免 @ 场景）

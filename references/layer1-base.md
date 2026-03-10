@@ -1,17 +1,19 @@
 # 第一层：基础推荐层（第 1 轮）
 
-## 备份
+## 备份（全量备份，推荐）
 
-备份目标：
-- `~/.openclaw/openclaw.json`
-- `~/.openclaw/workspace/`
-- `~/.openclaw/agents/`
+备份目标：整个 `~/.openclaw/`（包含配置、workspace、agents、cron、extensions 等）。
 
-命名规则：`backup-YYYYMMDD-HHMMSS.zip`
+备份保存目录：`~/openclaw-backups/`（强制放在 `~/.openclaw/` 之外，避免下次备份把旧备份再次打包导致“滚雪球”）
+
+命名规则：`backup-openclaw-all-YYYYMMDD-HHMMSS.zip`
 
 执行命令：
 ```bash
-cd ~/.openclaw && zip -r backup-$(date +%Y%m%d-%H%M%S).zip openclaw.json workspace/ agents/
+BACKUP_DIR="$HOME/openclaw-backups"
+mkdir -p "$BACKUP_DIR" 2>/dev/null || BACKUP_DIR="$HOME/.openclaw/backups"
+mkdir -p "$BACKUP_DIR"
+cd ~ && zip -r "$BACKUP_DIR/backup-openclaw-all-$(date +%Y%m%d-%H%M%S).zip" .openclaw/ -x ".openclaw/backups/*"
 ```
 
 ## 1) 流式消息
@@ -41,7 +43,9 @@ cd ~/.openclaw && zip -r backup-$(date +%Y%m%d-%H%M%S).zip openclaw.json workspa
 }
 ```
 
-## 2) 记忆功能（仅保留强制刷新）
+## 2) 记忆功能（记忆增强 + 可选每天归档）
+
+### 2.1 记忆增强（强制刷新，推荐）
 
 ```json
 "agents": {
@@ -59,6 +63,60 @@ cd ~/.openclaw && zip -r backup-$(date +%Y%m%d-%H%M%S).zip openclaw.json workspa
 注意：
 - `compaction` 必须深度合并，保留原有字段。
 - 不再主动写 `memorySearch`、`provider`、`modelPath` 等向量检索配置，交由 OpenClaw 新版默认能力接管。
+
+### 2.2 每日记忆自动归档（定时总结，可选）
+
+目标：每天定时让 AI 把“当天会话要点”整理成一份归档，写入目标 agent 的 `memory/YYYY-MM-DD.md`。
+
+关键说明（避免误解）：
+- 这是 **OpenClaw 内置 Cron（Gateway 调度器）**，不是系统 `crontab`。
+- **不会自动覆盖所有 agent**：每个 agent 都需要单独创建一条 cron 任务；只创建 main 的任务不会更新 `workspace-amadeus`、`workspace-workflow` 等其他 workspace。
+- 推荐在 `sessionTarget="isolated"` 的独立会话中执行，避免污染主对话上下文。
+- 默认不做通知：`delivery.mode="none"`（需要通知时再走“announce + channel/to”的链路）。
+
+#### 1) 查看 cron 任务列表 / 获取真实 job id
+
+```bash
+openclaw cron list
+```
+
+若需要从文件侧排查，可查看：`~/.openclaw/cron/jobs.json`。
+
+#### 2) 创建“每日记忆自动归档”任务（示例）
+
+下面示例以“每天 23:00（Asia/Shanghai）”为例；`agentId`、`model` 可按你的环境调整。
+
+若可直接调用 cron 工具（推荐）：
+
+```json
+{
+  "action": "add",
+  "job": {
+    "name": "每日记忆自动归档",
+    "agentId": "<target-agent-id>",
+    "schedule": { "expr": "0 23 * * *", "kind": "cron", "tz": "Asia/Shanghai" },
+    "sessionTarget": "isolated",
+    "payload": {
+      "kind": "agentTurn",
+      "message": "请执行每日记忆归档：\n1) 汇总今天（按当前时区）的会话要点\n2) 输出一个简短摘要 + 待办/结论\n3) 写入 memory/YYYY-MM-DD.md（YYYY-MM-DD 为今天日期）\n完成后回复 NO_REPLY（若不支持则简短回复完成）",
+      "model": "<optional-model-id>"
+    },
+    "delivery": { "mode": "none" }
+  }
+}
+```
+
+#### 3) 手动触发一次（用于验收）
+
+强制要求：手动触发前，必须先从 `cron list` 或 `jobs.json` 解析到 **真实 `job id`**（不要把任务名当成 id）。
+
+```bash
+openclaw cron run <job-id>
+```
+
+验收口径（建议）：
+- 目标 workspace 下出现 `memory/YYYY-MM-DD.md`
+- 文件内容包含“今日摘要/要点/结论或待办”
 
 ## 3) 消息回执
 
@@ -109,12 +167,16 @@ curl -L -s "https://defuddle.md/https://example.com" | head
 curl -L -s "https://r.jina.ai/http://example.com" | head
 ```
 
-## 5) 权限模式（可选）
+## 5) 权限模式（强烈建议保持 coding，可选）
 
-目标：不再默认只做“安全收紧”，而是先探测当前 OpenClaw 权限状态，再由用户选择要维持现状、完全开放，还是最小安全。
+目标：默认不做“权限收紧”，而是先探测当前 OpenClaw 权限状态，再由用户选择保持 `coding`、完全放开 `full`，或切到“纯聊天机器人”形态的 `minimal`。
+
+关键结论（避免误解）：
+- `minimal` profile 下，`exec` 工具组通常会被禁用（很多基础命令都跑不了），因此 **审批机制也没有触发机会**。
+- 只有在 `coding` / `full` 这种 **仍允许执行工具** 的 profile 下，再叠加 `exec` 审批（`security=allowlist + ask=on-miss`）才有意义：不在 allowlist 的命令才会弹出审批。
 
 推荐顺序：
-1) 维持现状（默认，推荐）
+1) 维持现状（默认，强烈推荐：`coding`）
 2) 完全开放（`full`，高风险）
 3) 最小安全（`minimal` + 沙箱，最严格，接近聊天模式）
 
@@ -128,7 +190,7 @@ command -v docker || echo docker_missing
 
 判定：
 - 若当前是 `tools.profile="coding"`：可直接继续执行本 skill，大多数基础功能不受影响。
-- 若当前是 `tools.profile="minimal"` 或其他明显受限状态：先提示用户手动执行 `openclaw config set tools.profile coding`，再继续本 skill。`minimal` 下很多列目录、读文件、执行动作都会被拦住，不适合测审批链路。
+- 若当前是 `tools.profile="minimal"` 或其他明显受限状态：先提示用户手动执行 `openclaw config set tools.profile coding`，再继续本 skill。`minimal` 下很多列目录、读文件、执行动作都会被拦住，审批链路也很难触发。
 - 若当前已是 `tools.profile="full"`：说明环境处于完全放开模式，应额外提醒用户风险。
 
 ### A. 维持现状（默认）
@@ -149,9 +211,11 @@ command -v docker || echo docker_missing
 ```
 
 说明：
-- `coding` 适合当前这套 skill 的原生体验。
+- `coding` 权限通常已经足够，是当前这套 skill 的原生体验，强烈建议保持。
 - 能读写配置、执行常规命令、完成大部分自动化修改。
-- 若要测试审批联动，默认建议保留 `coding` 再单独配置审批。
+- 若要启用审批，建议保持 `coding` 再叠加“exec 高危操作审批”。
+- 重要：仅保留 `coding` 不代表“删除文件 / sudo 一定会触发审批”。OpenClaw 新版里，`tools.profile` 只决定工具集合，不直接等于 exec 审批策略。
+- 若要验证审批，优先测试 `exec` 审批路径：确保 `exec-approvals.json` 已启用 `security=allowlist + ask=on-miss`，并执行一个“不在 allowlist 中”的命令来触发审批；不要把“rm 没弹审批”直接理解成 Telegram / Discord 审批联动失效。
 - 默认不额外改动用户现有权限配置；若探测到已是 `coding`，可直接维持。
 
 若当前权限太低，提示用户执行：
@@ -209,36 +273,94 @@ openclaw config set tools.profile coding
 - 若环境可自动修复（如 Debian/Ubuntu 且有 `sudo`）：可在用户同意后先安装 Docker。
 - 若无法自动修复：明确告知用户先装 Docker，随后再开启 `minimal + sandbox`。
 
-### 审批联动（仅最小安全模式相关）
+### Exec 高危操作审批（可选，仅 coding/full 有效）
 
-若用户明确要“最小安全 + 审批联动”，使用以下默认策略：
+设计目标：
+- **自动执行（allowlist）**：常用低风险命令（如 `ls/cat/rg/git status` 等）
+- **必须审批（不在 allowlist）**：高危操作（例如发布、清理、重置、写系统、删文件等）通过“缺省拒绝 + ask=on-miss”触发审批
 
-`exec-approvals.json` 默认策略：
+核心机制：
+- `security=allowlist`：只有命中 allowlist 的命令才会自动执行
+- `ask=on-miss`：未命中 allowlist 时弹出审批
+- `askFallback=deny`：无法触发审批或超时等情况默认拒绝
+
+`~/.openclaw/exec-approvals.json` 示例（模板，按实际路径调整）：
 
 ```json
 {
   "version": 1,
-  "socket": {},
-  "defaults": {
-    "security": "allowlist",
-    "ask": "always",
-    "askFallback": "deny"
-  },
-  "agents": {}
+  "defaults": { "security": "allowlist", "ask": "on-miss", "askFallback": "deny", "autoAllowSkills": true },
+  "agents": {
+    "main": {
+      "security": "allowlist",
+      "ask": "on-miss",
+      "askFallback": "deny",
+      "autoAllowSkills": true,
+      "allowlist": [
+        { "pattern": "/usr/bin/ls" },
+        { "pattern": "/bin/pwd" },
+        { "pattern": "/usr/bin/cat" },
+        { "pattern": "/usr/bin/grep" },
+        { "pattern": "/usr/bin/find" },
+        { "pattern": "/usr/bin/rg" },
+        { "pattern": "/usr/bin/openclaw" },
+        { "pattern": "/opt/homebrew/bin/openclaw" },
+        { "pattern": "/usr/bin/git" },
+        { "pattern": "/opt/homebrew/bin/git" },
+        { "pattern": "/usr/bin/python3" },
+        { "pattern": "/usr/bin/npm" }
+      ]
+    }
+  }
 }
 ```
 
-推荐命令（避免手写 JSON 出错）：
+写入方式（推荐命令，避免手写 JSON 出错）：
 
 ```bash
-printf '%s' '{"version":1,"socket":{},"defaults":{"security":"allowlist","ask":"always","askFallback":"deny"},"agents":{}}' | openclaw approvals set --stdin --json
+printf '%s' '{"version":1,"defaults":{"security":"allowlist","ask":"on-miss","askFallback":"deny","autoAllowSkills":true},"agents":{"main":{"security":"allowlist","ask":"on-miss","askFallback":"deny","autoAllowSkills":true,"allowlist":[{"pattern":"/usr/bin/ls"},{"pattern":"/bin/pwd"},{"pattern":"/usr/bin/cat"},{"pattern":"/usr/bin/grep"},{"pattern":"/usr/bin/find"},{"pattern":"/usr/bin/rg"},{"pattern":"/usr/bin/openclaw"},{"pattern":"/opt/homebrew/bin/openclaw"},{"pattern":"/usr/bin/git"},{"pattern":"/opt/homebrew/bin/git"},{"pattern":"/usr/bin/python3"},{"pattern":"/usr/bin/npm"}]}}}' | openclaw approvals set --stdin --json
 ```
 
-审批命令：
+审批命令（在接收审批的窗口内执行）：
 - `/approve <id> allow-once`
 - `/approve <id> allow-always`
 - `/approve <id> deny`
 
 注意：
 - OpenClaw `2026.2.24` 下，`tools.exec.askFallback` 不是合法键，`askFallback` 要放在 `exec-approvals.json`。
-- 若启用 `sandbox.mode="all"` 后出现 `spawn docker ENOENT` 或 `Sandbox mode requires Docker`，应立即改回 `"off"` 并重启 Gateway。
+- allowlist 建议用实际二进制路径（可用 `command -v ls`、`command -v git` 获取）；macOS Homebrew 常见路径是 `/opt/homebrew/bin/*`。
+- 如果只允许 `{ "pattern": "/usr/bin/git" }` 这类“放行整个二进制”，那么 `git push/pull/reset/clean` 也会一并被自动放行；若你想让这些高危子命令走审批，需要使用更细的 pattern（按子命令/参数）或干脆先不默认放行 `git`。
+
+### 审批提示投递（`approvals.exec`，一次性配置）
+
+上面 `exec-approvals.json` 解决的是“哪些命令会触发审批”。而 **审批提示发到哪里**（Discord/Telegram/…）由 `~/.openclaw/openclaw.json` 里的 `approvals.exec` 决定。
+
+推荐写法（示例）：
+
+```json
+{
+  "approvals": {
+    "exec": {
+      "enabled": true,
+      "mode": "both",
+      "targets": [
+        { "channel": "telegram", "to": "123456789" },
+        { "channel": "discord", "to": "user:123456789012345678" }
+      ]
+    }
+  }
+}
+```
+
+说明：
+- `mode`：`session`（跟随当前会话）/ `targets`（固定投递到指定账号/频道）/ `both`（两者都发）
+- Telegram：`to` 填你的 Telegram 用户 ID（可用 `@userinfobot` 查询）
+- Discord：建议显式写 `user:<id>`（DM）或 `channel:<id>`（频道），避免歧义
+- 前提：对应渠道必须已接入并可发消息，否则审批提示无法投递
+
+自动获取建议（尽量少手填）：
+- 如果你希望固定投递到某个 Telegram/Discord/飞书窗口，最稳的方式是：**在那个窗口里与机器人对话**，然后再启用 `mode=targets/both`。
+- 只要当前会话元数据里已经有目标字段，Skill 就可以自动落盘：
+  - Telegram：优先 `chat_id`，回退 `sender_id`
+  - Discord：优先 `channelId`（频道），DM 则需要用户 ID（拿不到时用 Discord Developer Mode 复制）
+  - Feishu：优先 `chat_id`（群），回退 `open_id`（单聊）

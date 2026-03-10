@@ -23,9 +23,9 @@
 - 基础推荐层（跨渠道通用）：流式消息、记忆功能、消息回执、联网搜索、权限模式
 - 第 0 层测试观测（可选）：用于测试阶段输出详细观测信息与验收证据
 - 渠道增强层（按渠道启用）：
-  - Discord：频道免 @ 响应、审批转发联动
+  - Discord：频道免 @ 响应、审批按钮（可选，需开启 `+审批`）
   - Feishu：探测 24h 缓存
-  - Telegram：审批联动（在 Telegram 内 `/approve`）
+  - Telegram：本层暂无增强项（审批提示投递见第 1 层权限模式的 `approvals.exec`）
 - Skills 推荐层：默认直接展示推荐清单（可一键跳过；点名即执行安装）
 - 新增渠道接入层（第 4 轮）：平台侧步骤 + 本地配置落盘 + 配对码放行
 
@@ -47,11 +47,12 @@
 | 记忆功能 | 全部 | 开 |
 | 消息回执 | 全部 | 开 |
 | 联网搜索 | 全部 | 开（defuddle 优先 + r.jina.ai 备用 + openclaw 隔离浏览器兜底） |
-| 权限模式 | 全部 | 可选（默认维持 coding，也可切 full / minimal） |
+| 权限模式 | 全部 | 可选（强烈建议保持 coding；minimal=纯聊天机器人；full=完全放开） |
+| Exec 高危操作审批 | 全部 | 按需（仅 coding/full 有效：allowlist + ask=on-miss；minimal 下 exec 往往不可用） |
+| 审批提示投递 | Discord/Telegram 等 | 按需（`approvals.exec` 的 `mode=session/targets/both` + `targets` 一次性配置） |
 | 频道免 @ 响应 | Discord | 按需 |
-| Discord 审批转发联动 | Discord | 开（第 5 项选择最小安全并启用审批时建议同步开） |
+| Discord 审批按钮 | Discord | 按需（仅在开启 `+审批` 后才有意义） |
 | 探测 24h 缓存 | Feishu | 开（在用 Feishu 时） |
-| Telegram 审批联动 | Telegram | 按需（第 5 项选择最小安全并启用审批时建议同步开） |
 | Skills 推荐层 | 全部 | 展示清单（可一键跳过，点名即安装） |
 | 新增渠道接入引导（第 4 轮） | 全部 | 按需 |
 
