@@ -47,7 +47,8 @@ openclaw config get tools.profile
 关键检查：
 - 维持现状：`tools.profile` 应保持 `coding`（或用户原本的可执行状态）
 - 完全开放：`tools.profile=full` 且 `sandbox.mode=off`
-- 最小安全：`tools.profile=minimal`
+- 最小安全：`tools.profile=minimal`；此模式接近聊天机器人，很多目录读取/文件操作会被限制
+- 审批测试默认建议：保持 `tools.profile=coding`，再验证高风险动作是否能触发审批
 - 最小安全 + 审批联动：approvals defaults 中应看到 `ask=always`、`askFallback=deny`、`security=allowlist`
 - 若日志出现 `spawn docker ENOENT` 或 `Sandbox mode requires Docker`，将 `agents.defaults.sandbox.mode` 改回 `"off"` 并重启
 

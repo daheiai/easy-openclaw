@@ -116,7 +116,7 @@ curl -L -s "https://r.jina.ai/http://example.com" | head
 推荐顺序：
 1) 维持现状（默认，推荐）
 2) 完全开放（`full`，高风险）
-3) 最小安全（`minimal` + 沙箱，最严格）
+3) 最小安全（`minimal` + 沙箱，最严格，接近聊天模式）
 
 探测命令（固定）：
 
@@ -128,7 +128,7 @@ command -v docker || echo docker_missing
 
 判定：
 - 若当前是 `tools.profile="coding"`：可直接继续执行本 skill，大多数基础功能不受影响。
-- 若当前是 `tools.profile="minimal"` 或其他明显受限状态：先提示用户手动执行 `openclaw config set tools.profile coding`，再继续本 skill。
+- 若当前是 `tools.profile="minimal"` 或其他明显受限状态：先提示用户手动执行 `openclaw config set tools.profile coding`，再继续本 skill。`minimal` 下很多列目录、读文件、执行动作都会被拦住，不适合测审批链路。
 - 若当前已是 `tools.profile="full"`：说明环境处于完全放开模式，应额外提醒用户风险。
 
 ### A. 维持现状（默认）
@@ -151,6 +151,7 @@ command -v docker || echo docker_missing
 说明：
 - `coding` 适合当前这套 skill 的原生体验。
 - 能读写配置、执行常规命令、完成大部分自动化修改。
+- 若要测试审批联动，默认建议保留 `coding` 再单独配置审批。
 - 默认不额外改动用户现有权限配置；若探测到已是 `coding`，可直接维持。
 
 若当前权限太低，提示用户执行：
@@ -183,7 +184,7 @@ openclaw config set tools.profile coding
 
 ### C. 最小安全（`minimal` + 沙箱）
 
-适用场景：把 OpenClaw 尽量收回到“偏聊天机器人”的状态。
+适用场景：把 OpenClaw 尽量收回到“偏聊天机器人”的状态。此模式非常严格，接近日常聊天，不适合拿来测审批联动。
 
 ```json
 "tools": {
