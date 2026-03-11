@@ -289,6 +289,14 @@ openclaw config set tools.profile coding
 - `ask=on-miss`：未命中 allowlist 时弹出审批
 - `askFallback=deny`：无法触发审批或超时等情况默认拒绝
 
+真正走审批路径时，不能只写消息投递：
+- `approvals.exec.*` 只解决“审批提示发到哪里”
+- 执行策略本身还需要命令真正走 gateway exec 路径
+- 测试闭环阶段建议同时具备：
+  - `tools.exec.host="gateway"`
+  - `tools.exec.security="allowlist"`
+  - `tools.exec.ask="always"`（先验通路）
+
 实用策略（当前仓库默认推荐）：
 - 默认采用“宽 allowlist，少打扰”的方式，优先覆盖大家最常用的读写/检索/开发命令：
   - `ls` / `cat` / `grep` / `rg` / `cp` / `find` / `pwd` / `echo` / `whoami` / `sed` / `head` / `tail`
@@ -363,6 +371,7 @@ openclaw config set tools.profile coding
 
 注意：
 - OpenClaw `2026.2.24` 下，`tools.exec.askFallback` 不是合法键，`askFallback` 要放在 `exec-approvals.json`。
+- `tools.exec.host` / `tools.exec.security` / `tools.exec.ask` 是执行路径配置；`approvals.exec` 不是它们的替代品。
 - allowlist 建议用实际二进制路径（可用 `command -v ls`、`command -v git` 获取）；macOS Homebrew 常见路径是 `/opt/homebrew/bin/*`。
 - 当前默认策略是“先别让常用命令一直打扰用户”；因此 `curl`、`pip3`、`yt-dlp`、`agent-reach` 这类常见读取/安装命令应优先被视为低风险放行对象。
 - 如果只允许 `{ "pattern": "/usr/bin/git" }` 这类“放行整个二进制”，那么 `git push/pull/reset/clean` 也会一并被自动放行；`npm` / `bun` 同理。若你想让这些高危子命令单独走审批，需要使用更细的 pattern（按子命令/参数）或干脆先不默认放行整条二进制。

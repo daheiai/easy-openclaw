@@ -83,6 +83,11 @@ cd ~ && zip -r "$BACKUP_DIR/backup-openclaw-all-$(date +%Y%m%d-%H%M%S).zip" .ope
 - `exec-approvals.json` 统一用 `security=allowlist + ask=on-miss + askFallback=deny`
 - allowlist 采用“实用优先”的宽放行策略，具体命令集按 `references/layer1-base.md`
 - 审批测试不要用 `curl/cat/ls/pip3` 这类默认放行命令做判据
+- 若用户开启第 7 项审批，除了 `approvals.exec.*` 与 `exec-approvals.json` 外，还必须同步写入真正的执行路径：
+  - `tools.exec.host="gateway"`
+  - `tools.exec.security="allowlist"`
+  - 测试闭环阶段优先 `tools.exec.ask="always"`，先确保审批链路真正走通
+- 若后续用户明确要求“降低打扰，只在未命中 allowlist 时再审批”，再把 `tools.exec.ask` 从 `always` 调回 `on-miss`
 
 ### 第 3 轮执行
 
@@ -137,6 +142,17 @@ cd ~ && zip -r "$BACKUP_DIR/backup-openclaw-all-$(date +%Y%m%d-%H%M%S).zip" .ope
 - 明确指出失败项
 - 给修复建议
 - 不影响其他已完成项的结论
+
+若第 7 项开启（Exec 审批），必须做“双验证”：
+- 配置层：确认 `tools.exec.host=gateway`、`tools.exec.security=allowlist`、`tools.exec.ask=always` 已生效，同时 `approvals.exec.*` 与 `exec-approvals.json` 已写入
+- 行为层：再触发一次**控制性的高风险 exec 命令**确认确实进入审批链路；不要只拿“删文件有没有弹窗”当唯一判据
+
+推荐的控制性高风险验收方式：
+1. 先创建一个临时测试文件，例如工作区下的 `.approval-smoke-test`
+2. 再执行删除这个临时文件的命令，确认出现审批
+3. 审批通过后，再确认命令继续执行
+
+这样既能验证“高风险动作会被拦住”，又不会碰用户真实文件。
 
 ## 6. 收尾总结
 

@@ -99,6 +99,7 @@
 - 审批策略统一使用 `exec-approvals.json` 的 `security=allowlist + ask=on-miss + askFallback=deny`
 - 默认 allowlist 应覆盖常见命令：`ls/cat/grep/rg/cp/find/pwd/echo/whoami/sed/head/tail/mkdir/mv/touch/tree/which/jq/curl/openclaw/git/python/python3/pip/pip3/npm/bun/pytest/uv`；若后续会装 `Agent Reach` / `Youtube Clipper`，再加 `yt-dlp` / `agent-reach`
 - 审批提示投递统一写到 `openclaw.json` 的 `approvals.exec`
+- 若用户开启这一项，执行阶段还必须同步写入 `tools.exec.host="gateway"` 与 `tools.exec.security="allowlist"`；测试闭环阶段优先将 `tools.exec.ask` 设为 `always`，先确保审批链路真正生效
 - 若用户选择 `targets` / `both`，优先自动提取当前会话目标：
   - Telegram：优先 `chat_id`，回退 `sender_id`
   - Discord：频道会话优先 `channelId`，写成 `channel:<id>`；DM 优先用户 ID，写成 `user:<id>`

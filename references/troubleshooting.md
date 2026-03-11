@@ -50,7 +50,16 @@ openclaw config get tools.profile
 - 最小安全：`tools.profile=minimal`；此模式接近聊天机器人，很多目录读取/文件操作会被限制
 - 审批测试默认建议：保持 `tools.profile=coding`，但不要直接拿“删除文件是否弹窗”当唯一判据
 - `minimal` 下 `exec` 往往不可用，因此审批机制也没有触发机会；若目标是“可执行 + 可审批”，保持 `coding` 或 `full` 再启用审批
-- 若要测 `exec` 审批，启用 `exec-approvals.json` 的 `security=allowlist + ask=on-miss`，并执行一个**明确不在默认宽 allowlist 中**的命令来触发审批，例如 `uname -a`；不要再拿 `curl` / `cat` / `ls` / `pip3` 这类默认应放行的命令做判据
+- 若要测 `exec` 审批，不要只写 `approvals.exec.enabled/mode`；还要确认真正的执行路径已经落盘：
+  - `tools.exec.host="gateway"`
+  - `tools.exec.security="allowlist"`
+  - 测试闭环阶段优先 `tools.exec.ask="always"`
+  - `exec-approvals.json` 中仍需存在 `security=allowlist` 与 `askFallback=deny`
+- 若只配了 `approvals.exec.*`，但实际命令没走 `gateway + allowlist + ask` 路径，审批消息可能根本不会进入正确链路
+- 若要做行为验收，优先用“配置快照 + 控制性高风险命令”双验证：
+  - 先确认配置里能读到 `tools.exec.host/security/ask`
+  - 再创建一个临时测试文件并删除它，确认高风险动作进入审批
+- 不要再拿 `curl` / `cat` / `ls` / `pip3` 这类默认应放行的命令做判据
 - 若会话仍是宿主机默认 full access，命令可能直接执行，不会进入审批
 - 若日志出现 `spawn docker ENOENT` 或 `Sandbox mode requires Docker`，将 `agents.defaults.sandbox.mode` 改回 `"off"` 并重启
 
