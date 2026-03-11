@@ -64,4 +64,4 @@
 
 主流程已可用，适合直接测试。
 
-当前主要剩余项是实测闭环（exec 审批：`approvals.exec` 投递 + `/approve`；Feishu 缓存验收）。
+当前主要剩余项是实测闭环（exec 审批：`approvals.exec` 投递 + `/approve`）。

@@ -158,12 +158,13 @@
 - 第 5 项“权限模式”已改为默认探测并支持 `coding / full / minimal` 三档；`coding/full + 审批`（allowlist + ask=on-miss）与 `approvals.exec` 的 `session/targets/both` 投递规则已写入执行规则；当前主线剩余工作已收敛到“安全审批闭环实测”。
 - Telegram 新增渠道接入链路已确认可写入配置并产生 pending pairing；已补强规则：检测到 pending pairing 后，必须提示用户回传配对码，并在 `pairing approve` 成功后自动续跑主流程。
 - Feishu 第 4 轮接入文案已加硬：必须按 1-7 与 8-12 两段完整输出，不允许退化成泛泛的平台说明。
+- Feishu 24h 缓存优化已完成并验证通过，不再属于当前待收尾项。
 - 第 4 项“联网搜索”已收敛为：`defuddle.md` 正文提取优先 + `r.jina.ai` 备用 + `browser.defaultProfile="openclaw"` 隔离浏览器兜底。
 
 ### 下次可直接续做
 - 优先补齐“审批提示投递到 Telegram targets”的端到端实测记录（含 `/approve` 成功与失败分流）。
 - 再补 Discord 审批闭环：确认 `approvals.exec` 投递到 `user:<id>` / `channel:<id>` 均可用；若开启“审批按钮”，确认按钮可用。
-- 再视精力补 Feishu 审批闭环（`approvals.exec` targets 投递到 `chat_id/open_id`）与 Feishu 24h 缓存自动验收项。
+- 再视精力补 Feishu 审批闭环（`approvals.exec` targets 投递到 `chat_id/open_id`）。
 - 持续维护第三层 Skills 推荐清单（当前 7 个条目，其中 2 个为生态仓库入口）。
 
 ---
@@ -176,7 +177,6 @@
 - 敏感命令是否触发 `/approve`
 - Discord 的 DM/频道审批是否都能触发
 - Discord 免 @ 在目标服务器是否生效
-- Feishu 缓存优化是否按条件执行
 4. 每轮测试后保存快照 zip（建议带状态标签）。
 
 ---
@@ -186,8 +186,7 @@
 1. Telegram 审批（targets 投递）：补齐端到端实测结论（`targets 配置 -> 审批消息 -> /approve`），当前规则已写，待补真实环境验收记录。
 2. Discord 审批：补齐端到端实测结论（`targets/session -> 审批消息 -> /approve`，以及可选按钮审批）。
 3. Feishu 审批：补齐端到端实测结论（`targets/session -> 审批消息 -> /approve`）。
-4. Feishu 24h 缓存优化：补一条“已改造成功”的自动验收检查项（便于测试时快速确认）。
-5. 第三层 Skills 推荐清单：按实际使用反馈补充/删减条目，并确保不会跑偏到系统内置 Skills 列表。
+4. 第三层 Skills 推荐清单：按实际使用反馈补充/删减条目，并确保不会跑偏到系统内置 Skills 列表。
 
 ---
 
