@@ -1,6 +1,6 @@
 # OpenClaw 优化配置参考总览
 
-本目录已按“总览 + 六个子文件”拆分，减少单文件过长带来的维护和检索成本。
+本目录已按“总览 + 八个子文件”拆分，减少单文件过长带来的维护和检索成本。
 
 ## 目录结构
 
@@ -9,6 +9,8 @@
 - 第二层（渠道增强层）：`references/layer2-channels.md`
 - 第三层（Skills 推荐层）：`references/layer3-skills.md`
 - 第四层（新增渠道接入）：`references/layer4-onboarding.md`
+- 条件补充提问：`references/collection.md`
+- 统一执行与收口：`references/execution.md`
 - 故障与验证（重启/排障）：`references/troubleshooting.md`
 
 ## 配置文件路径
@@ -60,8 +62,10 @@
 ## 建议读取顺序
 
 1. 若用户开启测试版输出，先看 `references/layer0-testing.md`
-2. 先看 `references/layer1-base.md`（基础能力）
-3. 再看 `references/layer2-channels.md`（按渠道处理）
-4. 第 3 轮默认读取 `references/layer3-skills.md`
-5. 如用户开启第 4 轮，再看 `references/layer4-onboarding.md`
-6. 执行和验证阶段统一看 `references/troubleshooting.md`
+2. 第 1 轮前看 `references/layer1-base.md`
+3. 第 2 轮前看 `references/layer2-channels.md`
+4. 第 3 轮前看 `references/layer3-skills.md`
+5. 第 4 轮前看 `references/layer4-onboarding.md`
+6. 四轮结束后、统一确认前看 `references/collection.md`
+7. 用户确认执行后看 `references/execution.md`
+8. 出现异常或需要核验时看 `references/troubleshooting.md`

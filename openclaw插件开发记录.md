@@ -163,6 +163,7 @@
 - Feishu 第 4 轮接入文案已加硬：必须按 1-7 与 8-12 两段完整输出，不允许退化成泛泛的平台说明。
 - Feishu 24h 缓存优化已完成并验证通过，不再属于当前待收尾项。
 - 第 4 项“联网搜索”已收敛为：`defuddle.md` 正文提取优先 + `r.jina.ai` 备用 + `browser.defaultProfile="openclaw"` 隔离浏览器兜底。
+- 本轮已做结构整理：`SKILL.md` 收敛为主流程；条件补问移到 `references/collection.md`；统一执行、重启、验收、止损移到 `references/execution.md`，后续不再继续把所有细节堆回主文件。
 
 ### 下次可直接续做
 - 优先补齐“审批提示投递到 Telegram targets”的端到端实测记录（含 `/approve` 成功与失败分流）。
