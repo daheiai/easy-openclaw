@@ -292,10 +292,10 @@ openclaw config set tools.profile coding
 真正走审批路径时，不能只写消息投递：
 - `approvals.exec.*` 只解决“审批提示发到哪里”
 - 执行策略本身还需要命令真正走 gateway exec 路径
-- 测试闭环阶段建议同时具备：
+- 实际配置时建议同时具备：
   - `tools.exec.host="gateway"`
   - `tools.exec.security="allowlist"`
-  - `tools.exec.ask="always"`（先验通路）
+  - `tools.exec.ask="on-miss"`
 
 实用策略（当前仓库默认推荐）：
 - 默认采用“宽 allowlist，少打扰”的方式，优先覆盖大家最常用的读写/检索/开发命令：
@@ -304,6 +304,9 @@ openclaw config set tools.profile coding
   - `openclaw` / `git` / `python` / `python3` / `pip` / `pip3` / `npm` / `bun` / `pytest` / `uv`
   - 若后续会装 `Agent Reach` / `Youtube Clipper`：再加 `yt-dlp` / `agent-reach`
 - 这样做的目标是：正常读取文件、拉 README、安装依赖、跑常规开发命令不该每一步都审批。
+- 期望表现应当是：
+  - `ls` / `cat` / `grep` / `rg` / `curl` / `python3` / `pip3` 这类常见命令默认直接执行
+  - `rm`、明显破坏性写操作、以及未命中 allowlist 的命令才进入审批
 - 当前 OpenClaw CLI（`2026.2.24`）只有 `allowlist add/remove` 与整份 `set/get`，**没有独立的 denylist 字段**。所以：
   - 如果你整条放行 `git` / `npm` / `bun` 二进制，那么 `git push/pull/reset/clean`、`npm publish`、`bun publish` 这类子命令也可能被一起放行。
   - 本仓库当前采用“实用优先”默认值，先解决“什么都要审批”的问题；只有用户明确要求更细粒度拦截时，才再缩小 pattern。

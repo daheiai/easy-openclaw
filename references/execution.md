@@ -86,8 +86,11 @@ cd ~ && zip -r "$BACKUP_DIR/backup-openclaw-all-$(date +%Y%m%d-%H%M%S).zip" .ope
 - 若用户开启第 7 项审批，除了 `approvals.exec.*` 与 `exec-approvals.json` 外，还必须同步写入真正的执行路径：
   - `tools.exec.host="gateway"`
   - `tools.exec.security="allowlist"`
-  - 测试闭环阶段优先 `tools.exec.ask="always"`，先确保审批链路真正走通
-- 若后续用户明确要求“降低打扰，只在未命中 allowlist 时再审批”，再把 `tools.exec.ask` 从 `always` 调回 `on-miss`
+  - `tools.exec.ask="on-miss"`
+- 若要做行为验证，直接使用一个明确不在 allowlist 中的命令；不要为了测试把整体审批策略切成更严格模式
+- 验收时默认应看到：
+  - `ls` / `cat` / `grep` / `curl` 这类常见命令直接通过
+  - 明确不在 allowlist 中的高风险命令才进入审批
 
 ### 第 3 轮执行
 
@@ -144,7 +147,7 @@ cd ~ && zip -r "$BACKUP_DIR/backup-openclaw-all-$(date +%Y%m%d-%H%M%S).zip" .ope
 - 不影响其他已完成项的结论
 
 若第 7 项开启（Exec 审批），必须做“双验证”：
-- 配置层：确认 `tools.exec.host=gateway`、`tools.exec.security=allowlist`、`tools.exec.ask=always` 已生效，同时 `approvals.exec.*` 与 `exec-approvals.json` 已写入
+- 配置层：确认 `tools.exec.host=gateway`、`tools.exec.security=allowlist`、`tools.exec.ask=on-miss` 已生效，同时 `approvals.exec.*` 与 `exec-approvals.json` 已写入
 - 行为层：再触发一次**控制性的高风险 exec 命令**确认确实进入审批链路；不要只拿“删文件有没有弹窗”当唯一判据
 
 推荐的控制性高风险验收方式：

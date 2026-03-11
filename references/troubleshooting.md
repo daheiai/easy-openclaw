@@ -53,13 +53,14 @@ openclaw config get tools.profile
 - 若要测 `exec` 审批，不要只写 `approvals.exec.enabled/mode`；还要确认真正的执行路径已经落盘：
   - `tools.exec.host="gateway"`
   - `tools.exec.security="allowlist"`
-  - 测试闭环阶段优先 `tools.exec.ask="always"`
+  - `tools.exec.ask="on-miss"`
   - `exec-approvals.json` 中仍需存在 `security=allowlist` 与 `askFallback=deny`
 - 若只配了 `approvals.exec.*`，但实际命令没走 `gateway + allowlist + ask` 路径，审批消息可能根本不会进入正确链路
 - 若要做行为验收，优先用“配置快照 + 控制性高风险命令”双验证：
   - 先确认配置里能读到 `tools.exec.host/security/ask`
-  - 再创建一个临时测试文件并删除它，确认高风险动作进入审批
+  - 再执行一个明确不在 allowlist 中的命令，确认真正进入审批
 - 不要再拿 `curl` / `cat` / `ls` / `pip3` 这类默认应放行的命令做判据
+- 如果你发现 `cat`、`grep`、`ls` 也在连续弹审批，通常不是“审批太安全”，而是 allowlist/defaults 没写完整，或 `tools.exec.ask` 被错误写成了更严格模式
 - 若会话仍是宿主机默认 full access，命令可能直接执行，不会进入审批
 - 若日志出现 `spawn docker ENOENT` 或 `Sandbox mode requires Docker`，将 `agents.defaults.sandbox.mode` 改回 `"off"` 并重启
 
