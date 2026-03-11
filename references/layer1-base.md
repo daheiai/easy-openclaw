@@ -317,7 +317,8 @@ openclaw config set tools.profile coding
 ```
 
 写入方式（强制）：
-- 不要直接照抄仓库里的示例路径；写入前必须先用 `command -v ls pwd cat grep find rg openclaw git python3 npm` 获取当前机器的真实路径。
+- 不要直接照抄仓库里的示例路径；写入前必须先用 `command -v ls pwd cat grep find rg which head tail sed jq echo curl openclaw git python3 npm` 获取当前机器的真实路径。
+- 若本轮或后续会使用 `Agent Reach` / `Youtube Clipper`，建议把 `yt-dlp` 也纳入默认低风险 allowlist。
 - 只把“当前机器上实际存在”的路径放进 allowlist。
 - 再将生成后的 JSON 通过 `openclaw approvals set --stdin --json` 写入。
 
@@ -334,6 +335,7 @@ openclaw config set tools.profile coding
 - 若审批消息里的“Reply with”示例缺少 `<id>`，仍应以消息中展示的**完整审批 ID** 为准，执行 `/approve <full-id> allow-once` / `allow-always` / `deny`。
 - `allow-once|allow-always|deny` 是“三选一占位符”，不能整串原样输入；正确命令必须只保留其中一个动作。
 - 若用户一时看不懂，agent 应直接回一条可复制的完整命令，例如：`/approve 49a500da-bd57-4458-a320-f1e65281f0d5 allow-once`。
+- 一旦出现一条待审批命令，agent 应暂停继续发新命令，先等待这条审批解决；不要在同一轮里连续堆出多个 pending approval。
 
 ### 审批提示投递（`approvals.exec`，一次性配置）
 

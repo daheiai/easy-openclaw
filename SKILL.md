@@ -532,8 +532,9 @@ cd ~ && zip -r "$BACKUP_DIR/backup-openclaw-all-$(date +%Y%m%d-%H%M%S).zip" .ope
 执行要求：
 - 禁止直接把仓库中的示例硬编码路径（如 `/usr/bin/openclaw`、`/opt/homebrew/bin/openclaw`）原样落盘，因为不同机器实际路径可能不同。
 - 必须先用 `command -v` 获取当前机器的真实路径，再生成 allowlist：
-  - `ls` / `pwd` / `cat` / `grep` / `find` / `rg`
+  - `ls` / `pwd` / `cat` / `grep` / `find` / `rg` / `which` / `head` / `tail` / `sed` / `jq` / `echo` / `curl`
   - `openclaw` / `git` / `python3` / `npm`
+  - 若本轮或后续会用到 `Agent Reach` / `Youtube Clipper`：把 `yt-dlp` 也纳入默认低风险 allowlist
 - 只把当前机器上实际存在的路径写入 allowlist。
 - 默认优先放行“单个低风险命令”的真实二进制路径；不要为了省事直接放行一个大而泛的 shell 包装命令。
 - 将生成后的 JSON 通过 `openclaw approvals set --stdin --json` 写入。
@@ -545,6 +546,7 @@ cd ~ && zip -r "$BACKUP_DIR/backup-openclaw-all-$(date +%Y%m%d-%H%M%S).zip" .ope
 - 若审批提示的“Reply with”示例缺少 `<id>`，仍应以消息里显示的完整 `ID` 为准，使用 `/approve <full-id> allow-once` / `allow-always` / `deny`。
 - 若用户在审批弹窗后显得困惑、输入错误，或明确问“该怎么批”，必须直接回一条**可复制的完整命令**，例如：`/approve 49a500da-bd57-4458-a320-f1e65281f0d5 allow-once`。
 - 必须明确说明：`allow-once|allow-always|deny` 是三选一的占位写法，不能把整串 `allow-once|allow-always|deny` 原样贴进命令。
+- 一旦出现一条待审批命令，必须立刻暂停后续 exec；在这条审批被 `allow` / `deny` / `expired` 之前，禁止继续发新的探测命令、替代命令或重试命令，避免同一会话里堆出多个 pending approval。
 
 ### 4. 飞书探测缓存改造（若第 9 项开启且用户使用 Feishu）
 
