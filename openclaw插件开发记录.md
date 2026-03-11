@@ -122,6 +122,7 @@
 - 将 `references/configs.md` 重构为“1 个总览 + 5 个子文件”，降低单文件复杂度。
 - 第三层 Skills 推荐已改为可执行：支持点名即安装；生态仓库入口默认直接展示链接与用途，按需再展开总结。
 - 第三层安装规则补强：多选时只能安装用户明确点名的编号；依赖缺失优先自动补齐，禁止“顺带装”未选择条目、禁止向用户索要终端密码。
+- 第三层推荐顺序已更新为：`OpenClaw Backup -> Agent Reach -> 安全防御矩阵 -> Find Skills -> Youtube Clipper -> OpenClaw Medical Skills -> 两个 GitHub 生态入口`。
 - 调整 Discord 渠道增强提问顺序：`6 免 @`、`7 审批转发`，并移除“多 Agent”项（避免与第 4 轮新增渠道语义重叠）。
 - 优化 Discord `guildId` 获取逻辑：
   - 默认路径改为 `channelId -> GET /channels/<channelId> -> guild_id`；

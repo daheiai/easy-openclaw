@@ -207,11 +207,12 @@ ls ~/.openclaw/backup-*.zip 2>/dev/null
 >
 > 1. OpenClaw Backup - 备份与恢复管理，支持自动备份调度
 > 2. Agent Reach - 补齐互联网访问能力（网页、YouTube、RSS、GitHub、Twitter 等）
-> 3. Find Skills - 帮你发现和安装更多 Skills
-> 4. Youtube Clipper - YouTube 内容快速剪辑提取
-> 5. OpenClaw Medical Skills - 医学/生物科研技能库（仓库入口）
-> 6. Awesome OpenClaw Usecases - 别人怎么用 OpenClaw（仓库入口）
-> 7. Awesome OpenClaw Skills - 更广泛的 Skills 清单（仓库入口）
+> 3. 安全防御矩阵 - 读取 SlowMist 安全指南并按文档部署防御矩阵
+> 4. Find Skills - 帮你发现和安装更多 Skills
+> 5. Youtube Clipper - YouTube 内容快速剪辑提取
+> 6. OpenClaw Medical Skills - 调用专业医疗数据库
+> 7. Awesome OpenClaw Usecases - `https://github.com/hesamsheikh/awesome-openclaw-usecases`
+> 8. Awesome OpenClaw Skills - `https://github.com/VoltAgent/awesome-openclaw-skills`
 >
 > 你想安装哪些？可以回复编号，或回复 `跳过第三层` 直接进入下一轮。
 >

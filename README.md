@@ -30,7 +30,7 @@
 3. Skills 推荐与安装
 - 默认直接展示推荐清单
 - 你点名要装哪个，AI 立刻执行安装
-- 包含：OpenClaw Backup、Agent Reach、Find Skills、Youtube Clipper、OpenClaw Medical Skills
+- 包含：OpenClaw Backup、Agent Reach、安全防御矩阵、Find Skills、Youtube Clipper、OpenClaw Medical Skills
 - 同时直接展示两个生态仓库入口：`awesome-openclaw-usecases`、`awesome-openclaw-skills`
 
 4. 新渠道接入引导

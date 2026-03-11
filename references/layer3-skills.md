@@ -65,7 +65,21 @@
   - 不得把“某个平台还没配 Cookie / 代理”误报成“整个 Agent Reach 安装失败”
   - 若通过自动补齐已解决 `pip` 缺失，应直接继续安装；不要停在“请用户自己先装 pip”
 
-### 3) Find Skills（可安装，用于后续扩展）
+### 3) 安全防御矩阵（仓库入口，安全基线加固）
+
+- 仓库：`https://github.com/slowmist/openclaw-security-practice-guide`
+- 核心文档：`https://github.com/slowmist/openclaw-security-practice-guide/blob/main/docs/OpenClaw%E6%9E%81%E7%AE%80%E5%AE%89%E5%85%A8%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97.md`
+- 核心能力：先理解 SlowMist 的这份极简安全实践指南，再按其思路为当前 OpenClaw 环境部署防御矩阵。
+- 适用场景：用户希望补齐“红/黄线规则、权限收窄、夜间巡检”这类系统级安全基线。
+- 执行动作（固定）：
+  - 先读取核心文档
+  - 再发送固定指令：
+    - `请完全按照这份指南，为我部署防御矩阵。包括写入红/黄线规则、收窄权限，并部署夜间巡检 Cron Job。`
+- 使用边界（强制）：
+  - 这是“仓库入口 + 固定执行指令”型条目，不是普通 ClawHub 一键安装 Skill
+  - 不得跳过文档直接凭记忆配置
+
+### 4) Find Skills（可安装，用于后续扩展）
 
 - ClawHub：`https://clawhub.ai/JimLiuxinghai/find-skills`
 - 核心能力：当用户后续明确提出“帮我找某类 Skill / 有没有能做 X 的 Skill / 我还想扩展能力”时，帮助发现并安装合适的 Skill。
@@ -78,16 +92,16 @@
   - 不得把它当作本层默认推荐清单的生成器
   - 不得用它覆盖本文件里的固定推荐项
 
-### 4) Youtube Clipper Skill（可直接安装）
+### 5) Youtube Clipper Skill（可直接安装）
 
 - 仓库：`https://github.com/op7418/Youtube-clipper-skill`
 - 推荐场景：YouTube 内容快速剪辑、提取、再利用。
 - 执行动作（固定）：按仓库 README 安装步骤执行，安装后做一次最小链路验证。
 
-### 5) OpenClaw Medical Skills（仓库入口，医学方向）
+### 6) OpenClaw Medical Skills（仓库入口）
 
 - 仓库：`https://github.com/FreedomIntelligence/OpenClaw-Medical-Skills`
-- 核心能力：提供大规模医学与生物科研技能库，覆盖临床、基因组学、药物发现、生物信息学、医疗器械等方向。
+- 核心能力：调用专业医疗数据库与医学/生物科研相关能力，覆盖临床、基因组学、药物发现、生物信息学、医疗器械等方向。
 - 适用场景：用户本身就是医学、生命科学、临床研究相关使用者，想把 OpenClaw 扩展成领域型研究助手。
 - 安装方式（固定）：
   - 优先按上游 README 的 OpenClaw 路线安装
@@ -97,14 +111,14 @@
   - 安装后让 agent 回答“你现在有哪些医学/临床相关 skills”
   - 若用户只安装了部分子集，汇报时必须明确“已安装的是子集，不是整库”
 
-### 6) Awesome OpenClaw Usecases（仓库入口）
+### 7) Awesome OpenClaw Usecases
 
 - 仓库：`https://github.com/hesamsheikh/awesome-openclaw-usecases`
-- 用途：查看别人怎么实际使用 OpenClaw、有哪些可复用场景与工作流。
+- 用途：查看 OpenClaw 的典型用例与可复用场景。
 - 默认动作：仅展示仓库链接和用途。
 - 若用户明确要求“展开总结”，再抓取并分类整理典型用例。
 
-### 7) Awesome OpenClaw Skills（仓库入口）
+### 8) Awesome OpenClaw Skills
 
 - 仓库：`https://github.com/VoltAgent/awesome-openclaw-skills`
 - 用途：查看更广泛的 Skills 清单与生态入口，适合继续挑选其他可安装技能。
