@@ -29,7 +29,7 @@
 3. Skills 推荐与安装
 - 默认直接展示推荐清单
 - 你点名要装哪个，AI 立刻执行安装
-- 包含：Youtube Clipper、TTS、RedBookSkills、大黑AI日报
+- 包含：Youtube Clipper（以及“更多 Skills 扩展入口”）
 - 额外提供“更多 Skills 扩展入口”（两个 awesome 仓库链接）
 
 4. 新渠道接入引导
@@ -53,7 +53,6 @@
 - 如果你要接 Discord / Telegram，确保：
   - OpenClaw 所在服务器可以访问对应平台
   - 你当前网络环境也可以访问对应平台
-- 大黑AI日报安装后，先手动发一条测试消息确认可达，再启用定时推送。
 
 ## 项目文件说明（想深入再看）
 
@@ -65,4 +64,4 @@
 
 主流程已可用，适合直接测试。
 
-当前主要剩余项是实测闭环（exec 审批：`approvals.exec` 投递 + `/approve`；TTS/RedBook 实装验收；Feishu 缓存验收）。
+当前主要剩余项是实测闭环（exec 审批：`approvals.exec` 投递 + `/approve`；Feishu 缓存验收）。

@@ -159,16 +159,12 @@
 - Telegram 新增渠道接入链路已确认可写入配置并产生 pending pairing；已补强规则：检测到 pending pairing 后，必须提示用户回传配对码，并在 `pairing approve` 成功后自动续跑主流程。
 - Feishu 第 4 轮接入文案已加硬：必须按 1-7 与 8-12 两段完整输出，不允许退化成泛泛的平台说明。
 - 第 4 项“联网搜索”已收敛为：`defuddle.md` 正文提取优先 + `r.jina.ai` 备用 + `browser.defaultProfile="openclaw"` 隔离浏览器兜底。
-- 大黑AI日报安装规则已补齐“投递目标强校验”：`delivery.mode/channel/to` 必填，且 `to` 必须映射当前会话窗口；缺失时禁止宣告成功。
-- 大黑AI日报安装流程已补齐“先即时测试后定时”：先强制手动触发并向当前窗口发送测试消息，用户确认收到后再进入定时调度。
-- 本轮对大黑AI日报做过一次现场排查，发现 VM 内 `jobs.json`、Gateway 调度器状态、历史 cron 会话存在不同步现象；该项已暂缓，不作为当前主线阻塞项。
 
 ### 下次可直接续做
 - 优先补齐“审批提示投递到 Telegram targets”的端到端实测记录（含 `/approve` 成功与失败分流）。
 - 再补 Discord 审批闭环：确认 `approvals.exec` 投递到 `user:<id>` / `channel:<id>` 均可用；若开启“审批按钮”，确认按钮可用。
 - 再视精力补 Feishu 审批闭环（`approvals.exec` targets 投递到 `chat_id/open_id`）与 Feishu 24h 缓存自动验收项。
-- 大黑AI日报问题已暂缓，后续如要继续，先从“禁止重建任务、只做即时触发测试”重新收敛规则。
-- 持续维护第三层 Skills 推荐清单（当前 5 个条目，含 1 个“更多 Skills 扩展入口”）。
+- 持续维护第三层 Skills 推荐清单（当前 2 个条目，含 1 个“更多 Skills 扩展入口”）。
 
 ---
 
@@ -191,8 +187,7 @@
 2. Discord 审批：补齐端到端实测结论（`targets/session -> 审批消息 -> /approve`，以及可选按钮审批）。
 3. Feishu 审批：补齐端到端实测结论（`targets/session -> 审批消息 -> /approve`）。
 4. Feishu 24h 缓存优化：补一条“已改造成功”的自动验收检查项（便于测试时快速确认）。
-5. Skills 实装验收：补齐 TTS / RedBookSkills 的端到端安装与验收记录。
-6. 大黑AI日报：暂缓；若后续恢复排查，先核对 cron 文件、Gateway scheduler 与实际投递链路的一致性，再决定是否改规则。
+5. 第三层 Skills 推荐清单：按实际使用反馈补充/删减条目，并确保不会跑偏到系统内置 Skills 列表。
 
 ---
 

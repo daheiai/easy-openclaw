@@ -192,13 +192,6 @@ cd ~/.openclaw && unzip -o <文件名> -d ~/.openclaw/
 - 若用户点名安装某个 Skill：立即执行安装链路（读取 README 安装段落 -> 原样执行 -> 最小验证 -> 回报结果）
 - 对“更多 Skills 扩展入口”默认只展示双仓链接，不自动抓取摘要；用户明确要求“展开总结”再抓取分类
 - 若模型已读取到系统 Skills 列表，也不得将其当作第 3 轮默认推荐清单；只有用户明确要求“看看系统里还有哪些 Skills”时，才可单独展示系统列表。
-- 若安装“大黑AI日报”：必须补齐 `delivery.mode=announce`、`delivery.channel=<当前会话渠道>`、`delivery.to=<当前窗口目标ID>`；`delivery.to` 为空时只能报“待修复”，不能报“安装成功”
-- 若安装“大黑AI日报”：内容来源固定为 `https://news.daheiai.com/rss.php` 最新一个 `item`；禁止把网页抓取当主路径
-- 若安装“大黑AI日报”：字段优先级固定为 `content:encoded > description > link`，并用 `guid / pubDate / title` 做去重与展示
-- 若安装“大黑AI日报”：手动测试触发前，必须先通过 `cron list` 或任务文件解析出真实 `job id`；禁止把任务名（例如“大黑AI日报”）直接当作 `cron run` 的 id 使用
-- 若安装“大黑AI日报”：安装后必须立刻手动触发一次日报，且先向用户输出一条“测试消息/即时触发”再验证“当前窗口已收到消息”
-- 若安装“大黑AI日报”：若 `cron run` 只返回 `enqueued`，只能汇报“已入队等待投递结果”，不能直接汇报“测试推送成功”
-- 若安装“大黑AI日报”：只有在用户确认收到测试消息后，才可宣告安装完成并开启定时调度
 
 ---
 
@@ -688,15 +681,6 @@ openclaw config get tools.profile
   - `curl -L -s "https://r.jina.ai/http://example.com" | head`
 - 若正文提取成功但浏览器不可用：标记为“基础联网搜索可用，浏览器兜底不可用”
 - 若两层正文提取均失败，再提示回退到浏览器抓取或现有 `web_search` 提供商
-
-若第 3 轮安装了“大黑AI日报”，额外验证：
-- 已写入 `delivery.mode=announce`
-- 已写入 `delivery.channel` 且与当前会话渠道一致
-- 已写入 `delivery.to`（禁止为空）
-- RSS 最新一期可稳定读取到 `title / pubDate / guid / link`
-- 正文优先读取 `content:encoded`；若缺失再回退 `description`
-- 手动触发一次日报后，当前窗口可收到“测试消息/即时触发”标记的测试消息；否则标记为“待修复”
-- 用户确认收到测试消息后，才可进入“定时调度已启用”状态
 
 若第 12 项开启（新增渠道接入），额外验证：
 - 执行 `openclaw channels status --probe`
