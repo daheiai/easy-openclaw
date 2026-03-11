@@ -3,3 +3,4 @@
 *.zip
 .env
 .env.*
+.private-docs/
