@@ -23,7 +23,7 @@
 - 基础推荐层（跨渠道通用）：流式消息、记忆功能、消息回执、联网搜索、权限模式
 - 第 0 层测试观测（可选）：用于测试阶段输出详细观测信息与验收证据
 - 渠道增强层（按渠道启用）：
-  - 跨渠道：Exec 高危操作审批（仅 `coding/full` 有效，默认建议关）
+  - 跨渠道：Exec 高危操作审批（仅 `coding/full` 有效，默认建议关；开启后采用宽 allowlist，避免常见命令频繁审批）
   - Discord：频道免 @ 响应、审批按钮（可选，需先开启审批）
   - Feishu：探测 24h 缓存
   - Telegram：可在本层直接配置审批提示投递
@@ -49,7 +49,7 @@
 | 消息回执 | 全部 | 开 |
 | 联网搜索 | 全部 | 开（defuddle 优先 + r.jina.ai 备用 + openclaw 隔离浏览器兜底） |
 | 权限模式 | 全部 | 可选（强烈建议保持 coding；minimal=纯聊天机器人；full=完全放开） |
-| Exec 高危操作审批 | 全部 | 按需（第 2 轮收集；默认建议关；仅 coding/full 有效：allowlist + ask=on-miss；minimal 下 exec 往往不可用） |
+| Exec 高危操作审批 | 全部 | 按需（第 2 轮收集；默认建议关；仅 coding/full 有效：宽 allowlist + ask=on-miss，尽量只让少见/高敏命令弹审批；minimal 下 exec 往往不可用） |
 | 审批提示投递 | Discord/Telegram 等 | 按需（`approvals.exec` 的 `mode=session/targets/both` + `targets` 一次性配置） |
 | 频道免 @ 响应 | Discord | 按需 |
 | Discord 审批按钮 | Discord | 按需（仅在第 2 轮已开启审批后才有意义） |

@@ -277,13 +277,24 @@ openclaw config set tools.profile coding
 ### Exec 高危操作审批（机制说明；实际收集在第 2 轮，仅 coding/full 有效）
 
 设计目标：
-- **自动执行（allowlist）**：常用低风险命令（如 `ls/cat/rg/git status` 等）
-- **必须审批（不在 allowlist）**：高危操作（例如发布、清理、重置、写系统、删文件等）通过“缺省拒绝 + ask=on-miss”触发审批
+- **自动执行（allowlist）**：常用低风险命令尽量直接放行，避免 `ls/cat/curl/head` 这类日常操作也频繁弹窗
+- **必须审批（不在 allowlist）**：少见或高风险操作通过“缺省拒绝 + ask=on-miss”触发审批
 
 核心机制：
 - `security=allowlist`：只有命中 allowlist 的命令才会自动执行
 - `ask=on-miss`：未命中 allowlist 时弹出审批
 - `askFallback=deny`：无法触发审批或超时等情况默认拒绝
+
+实用策略（当前仓库默认推荐）：
+- 默认采用“宽 allowlist，少打扰”的方式，优先覆盖大家最常用的读写/检索/开发命令：
+  - `ls` / `cat` / `grep` / `rg` / `cp` / `find` / `pwd` / `echo` / `whoami` / `sed` / `head` / `tail`
+  - `mkdir` / `mv` / `touch` / `tree` / `which` / `jq` / `curl`
+  - `openclaw` / `git` / `python` / `python3` / `pip` / `pip3` / `npm` / `bun` / `pytest` / `uv`
+  - 若后续会装 `Agent Reach` / `Youtube Clipper`：再加 `yt-dlp` / `agent-reach`
+- 这样做的目标是：正常读取文件、拉 README、安装依赖、跑常规开发命令不该每一步都审批。
+- 当前 OpenClaw CLI（`2026.2.24`）只有 `allowlist add/remove` 与整份 `set/get`，**没有独立的 denylist 字段**。所以：
+  - 如果你整条放行 `git` / `npm` / `bun` 二进制，那么 `git push/pull/reset/clean`、`npm publish`、`bun publish` 这类子命令也可能被一起放行。
+  - 本仓库当前采用“实用优先”默认值，先解决“什么都要审批”的问题；只有用户明确要求更细粒度拦截时，才再缩小 pattern。
 
 `~/.openclaw/exec-approvals.json` 示例（模板，按实际路径调整）：
 
@@ -302,14 +313,33 @@ openclaw config set tools.profile coding
         { "pattern": "/bin/pwd" },
         { "pattern": "/usr/bin/cat" },
         { "pattern": "/usr/bin/grep" },
+        { "pattern": "/bin/cp" },
         { "pattern": "/usr/bin/find" },
         { "pattern": "/usr/bin/rg" },
+        { "pattern": "/usr/bin/echo" },
+        { "pattern": "/usr/bin/whoami" },
+        { "pattern": "/usr/bin/sed" },
+        { "pattern": "/usr/bin/head" },
+        { "pattern": "/usr/bin/tail" },
+        { "pattern": "/bin/mkdir" },
+        { "pattern": "/bin/mv" },
+        { "pattern": "/usr/bin/touch" },
+        { "pattern": "/opt/homebrew/bin/tree" },
+        { "pattern": "/usr/bin/which" },
+        { "pattern": "/usr/bin/jq" },
+        { "pattern": "/usr/bin/curl" },
         { "pattern": "/usr/bin/openclaw" },
         { "pattern": "/opt/homebrew/bin/openclaw" },
         { "pattern": "/usr/bin/git" },
         { "pattern": "/opt/homebrew/bin/git" },
+        { "pattern": "/usr/bin/python" },
         { "pattern": "/usr/bin/python3" },
-        { "pattern": "/usr/bin/npm" }
+        { "pattern": "/usr/bin/pip" },
+        { "pattern": "/usr/bin/pip3" },
+        { "pattern": "/usr/bin/npm" },
+        { "pattern": "/opt/homebrew/bin/bun" },
+        { "pattern": "/usr/bin/pytest" },
+        { "pattern": "/opt/homebrew/bin/uv" }
       ]
     }
   }
@@ -317,8 +347,8 @@ openclaw config set tools.profile coding
 ```
 
 写入方式（强制）：
-- 不要直接照抄仓库里的示例路径；写入前必须先用 `command -v ls pwd cat grep find rg which head tail sed jq echo curl openclaw git python3 npm` 获取当前机器的真实路径。
-- 若本轮或后续会使用 `Agent Reach` / `Youtube Clipper`，建议把 `yt-dlp` 也纳入默认低风险 allowlist。
+- 不要直接照抄仓库里的示例路径；写入前必须先用 `command -v ls pwd cat grep rg cp find echo whoami sed head tail mkdir mv touch tree which jq curl openclaw git python python3 pip pip3 npm bun pytest uv` 获取当前机器的真实路径。
+- 若本轮或后续会使用 `Agent Reach` / `Youtube Clipper`，建议把 `yt-dlp` / `agent-reach` 也纳入默认低风险 allowlist。
 - 只把“当前机器上实际存在”的路径放进 allowlist。
 - 再将生成后的 JSON 通过 `openclaw approvals set --stdin --json` 写入。
 
@@ -330,7 +360,8 @@ openclaw config set tools.profile coding
 注意：
 - OpenClaw `2026.2.24` 下，`tools.exec.askFallback` 不是合法键，`askFallback` 要放在 `exec-approvals.json`。
 - allowlist 建议用实际二进制路径（可用 `command -v ls`、`command -v git` 获取）；macOS Homebrew 常见路径是 `/opt/homebrew/bin/*`。
-- 如果只允许 `{ "pattern": "/usr/bin/git" }` 这类“放行整个二进制”，那么 `git push/pull/reset/clean` 也会一并被自动放行；若你想让这些高危子命令走审批，需要使用更细的 pattern（按子命令/参数）或干脆先不默认放行 `git`。
+- 当前默认策略是“先别让常用命令一直打扰用户”；因此 `curl`、`pip3`、`yt-dlp`、`agent-reach` 这类常见读取/安装命令应优先被视为低风险放行对象。
+- 如果只允许 `{ "pattern": "/usr/bin/git" }` 这类“放行整个二进制”，那么 `git push/pull/reset/clean` 也会一并被自动放行；`npm` / `bun` 同理。若你想让这些高危子命令单独走审批，需要使用更细的 pattern（按子命令/参数）或干脆先不默认放行整条二进制。
 - 若开启审批后要做读取/验收，优先一条命令一条命令执行；不要默认用 `ls && cat`、长管道或复合 shell 命令，否则更容易连续触发多条审批。
 - 若审批消息里的“Reply with”示例缺少 `<id>`，仍应以消息中展示的**完整审批 ID** 为准，执行 `/approve <full-id> allow-once` / `allow-always` / `deny`。
 - `allow-once|allow-always|deny` 是“三选一占位符”，不能整串原样输入；正确命令必须只保留其中一个动作。

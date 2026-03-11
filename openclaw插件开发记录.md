@@ -156,7 +156,7 @@
 - 三层流程可用，第二层 Discord 分支交互已降压（仅保留高频两项）。
 - 第三层默认直接展示推荐清单，并保留“跳过第三层”一键跳过选项；用户点名则立即安装执行。
 - 运行策略为“先实测体感，再做最小必要校验”，暂不强推额外自动化回归脚本。
-- 第 5 项“权限模式”已改为默认探测并支持 `coding / full / minimal` 三档；`coding/full + 审批`（allowlist + ask=on-miss）与 `approvals.exec` 的 `session/targets/both` 投递规则已写入执行规则；当前主线剩余工作已收敛到“安全审批闭环实测”。
+- 第 5 项“权限模式”已改为默认探测并支持 `coding / full / minimal` 三档；`coding/full + 审批` 已切到“宽 allowlist + ask=on-miss”的实用策略，优先放行常见读写/开发命令，再配合 `approvals.exec` 的 `session/targets/both` 投递规则；当前主线剩余工作已收敛到“安全审批闭环实测”。
 - Telegram 新增渠道接入链路已确认可写入配置并产生 pending pairing；已补强规则：检测到 pending pairing 后，必须提示用户回传配对码，并在 `pairing approve` 成功后自动续跑主流程。
 - Feishu 第 4 轮接入文案已加硬：必须按 1-7 与 8-12 两段完整输出，不允许退化成泛泛的平台说明。
 - Feishu 24h 缓存优化已完成并验证通过，不再属于当前待收尾项。

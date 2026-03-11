@@ -80,13 +80,14 @@
 
 ## 7) Exec 高危操作审批（跨渠道，可选）
 
-适用场景：当前权限模式不是 `minimal`，希望把“未命中 allowlist 的高危命令”改成先审批再执行。
+适用场景：当前权限模式不是 `minimal`，希望把“少见或高敏感命令”改成先审批再执行，同时不要让常见读取/开发命令一直打扰用户。
 
 定位说明：
 - 这一项属于第 2 轮统一收集，不再放在第 1 轮“权限模式”里。
 - 第 1 轮第 5 项只决定 `coding / full / minimal`。
 - 只有在 `coding` / `full` 下，这一项才有意义；`minimal` 下 exec 往往不可用，审批也没有触发机会。
-- 默认建议关闭；只有用户明确需要“先审批再执行”时再开启。因为开启后很多读取、检查、执行动作也会更繁琐。
+- 默认建议关闭；只有用户明确需要“先审批再执行”时再开启。
+- 开启后采用“宽 allowlist + on-miss 审批”的实用策略：常见低风险命令尽量直接放行，审批尽量留给真正少见或高风险的操作。
 
 可选值：
 - `关`
@@ -96,6 +97,7 @@
 
 执行规则：
 - 审批策略统一使用 `exec-approvals.json` 的 `security=allowlist + ask=on-miss + askFallback=deny`
+- 默认 allowlist 应覆盖常见命令：`ls/cat/grep/rg/cp/find/pwd/echo/whoami/sed/head/tail/mkdir/mv/touch/tree/which/jq/curl/openclaw/git/python/python3/pip/pip3/npm/bun/pytest/uv`；若后续会装 `Agent Reach` / `Youtube Clipper`，再加 `yt-dlp` / `agent-reach`
 - 审批提示投递统一写到 `openclaw.json` 的 `approvals.exec`
 - 若用户选择 `targets` / `both`，优先自动提取当前会话目标：
   - Telegram：优先 `chat_id`，回退 `sender_id`
@@ -103,6 +105,7 @@
   - Feishu：优先 `chat_id`，回退 `open_id`
 - 若当前会话拿不到目标 ID，才让用户手动提供
 - 若第 5 项选择了 `最小安全`，则这一项必须强制关闭，不再继续追问投递目标
+- 当前 OpenClaw CLI 没有单独 `denylist` 字段；如果整条放行 `git/npm/bun`，则其高危子命令也可能一起放行。默认先采用低打扰策略，只有用户明确提出时才额外细化。
 
 建议优先参考：`references/layer1-base.md` 中的“Exec 高危操作审批（机制说明；实际收集在第 2 轮）”。
 

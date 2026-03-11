@@ -164,15 +164,15 @@ cd ~/.openclaw && unzip -o <文件名> -d ~/.openclaw/
 >
 > 若当前渠道为 `discord`：
 > 6. Discord 频道免 @ 响应：在指定服务器内不 @ 也可触发回复
-> 7. Exec 高危操作审批（可选，仅 `coding/full` 有效，默认建议关）：未命中 allowlist 的命令先审批再执行；开启后很多读取/执行动作也会变得更受限、更繁琐（`关` / `session` / `targets` / `both`）
+> 7. Exec 高危操作审批（可选，仅 `coding/full` 有效，默认建议关）：只在你确实想让“高敏感操作先审批”时再开启；本 skill 会尽量预放行常见低风险命令，避免 `ls/cat/curl` 这类日常命令也反复弹审批（`关` / `session` / `targets` / `both`）
 > 8. Discord 审批按钮（可选）：在 Discord 内用按钮审批（仅当第 7 项不为 `关` 时才有意义）
 >
 > 若当前渠道为 `feishu`：
-> 7. Exec 高危操作审批（可选，仅 `coding/full` 有效，默认建议关）：未命中 allowlist 的命令先审批再执行；开启后很多读取/执行动作也会变得更受限、更繁琐（`关` / `session` / `targets` / `both`）
+> 7. Exec 高危操作审批（可选，仅 `coding/full` 有效，默认建议关）：只在你确实想让“高敏感操作先审批”时再开启；本 skill 会尽量预放行常见低风险命令，避免 `ls/cat/curl` 这类日常命令也反复弹审批（`关` / `session` / `targets` / `both`）
 > 9. 飞书限额优化：探测逻辑加 24h 缓存，避免每分钟探测把月限额跑满
 >
 > 若当前渠道为 `telegram`：
-> 7. Exec 高危操作审批（可选，仅 `coding/full` 有效，默认建议关）：未命中 allowlist 的命令先审批再执行；开启后很多读取/执行动作也会变得更受限、更繁琐（`关` / `session` / `targets` / `both`）
+> 7. Exec 高危操作审批（可选，仅 `coding/full` 有效，默认建议关）：只在你确实想让“高敏感操作先审批”时再开启；本 skill 会尽量预放行常见低风险命令，避免 `ls/cat/curl` 这类日常命令也反复弹审批（`关` / `session` / `targets` / `both`）
 >
 > 请按格式回复：`discord 用 6 开, 7 session, 8 关；feishu 用 7 关, 9 开；telegram 用 7 session`
 
@@ -186,6 +186,7 @@ cd ~/.openclaw && unzip -o <文件名> -d ~/.openclaw/
   - 然后继续完成第 2 轮未收集项
   - 未完成前不得跳到第 3 轮，也不得展示任何 Skills 清单
 - 默认建议：第 7 项优先建议用户选择 `关`；只有用户明确希望“先审批再执行”时，才继续开启审批链路。
+- 若用户问“不开这项会不会自动审批”：必须明确回答“不会形成完整的先审批后执行链路；只有显式开启第 7 项并写入 `exec-approvals.json` 后，未命中 allowlist 的命令才会审批”。
 
 ---
 
@@ -531,17 +532,20 @@ cd ~ && zip -r "$BACKUP_DIR/backup-openclaw-all-$(date +%Y%m%d-%H%M%S).zip" .ope
 
 执行要求：
 - 禁止直接把仓库中的示例硬编码路径（如 `/usr/bin/openclaw`、`/opt/homebrew/bin/openclaw`）原样落盘，因为不同机器实际路径可能不同。
-- 必须先用 `command -v` 获取当前机器的真实路径，再生成 allowlist：
-  - `ls` / `pwd` / `cat` / `grep` / `find` / `rg` / `which` / `head` / `tail` / `sed` / `jq` / `echo` / `curl`
-  - `openclaw` / `git` / `python3` / `npm`
-  - 若本轮或后续会用到 `Agent Reach` / `Youtube Clipper`：把 `yt-dlp` 也纳入默认低风险 allowlist
+- 必须先用 `command -v` 获取当前机器的真实路径，再生成“实用优先”的宽 allowlist；默认尽量放行常见读取、检索、开发、安装命令，避免用户连 `curl/head/ls/cat` 都频繁审批：
+  - `ls` / `pwd` / `cat` / `grep` / `rg` / `cp` / `find` / `echo` / `whoami` / `sed` / `head` / `tail` / `mkdir` / `mv` / `touch` / `tree` / `which` / `jq` / `curl`
+  - `openclaw` / `git` / `python` / `python3` / `pip` / `pip3` / `npm` / `bun` / `pytest` / `uv`
+  - 若本轮或后续会用到 `Agent Reach` / `Youtube Clipper`：把 `yt-dlp` / `agent-reach` 也纳入默认低风险 allowlist
 - 只把当前机器上实际存在的路径写入 allowlist。
 - 默认优先放行“单个低风险命令”的真实二进制路径；不要为了省事直接放行一个大而泛的 shell 包装命令。
+- 目标效果：日常读取、排查、安装依赖、运行常规开发命令不应频繁弹审批；审批应尽量集中在真正少见或高风险的命令上。
+- 必须明确知晓当前 OpenClaw CLI 是 `allowlist` 模式，没有单独的 `denylist` 字段；如果整条放行 `/usr/bin/git`、`npm`、`bun`，那 `git push/pull/reset/clean`、`npm publish`、`bun publish` 这类子命令也可能随之放行。默认按“减少骚扰”的实用策略执行；只有用户明确要求更细拦截时，才再收紧 pattern。
 - 将生成后的 JSON 通过 `openclaw approvals set --stdin --json` 写入。
 
 要求：
 - 必须执行成功并回显 `defaults.security=allowlist`、`defaults.ask=on-miss`、`defaults.askFallback=deny`
 - 若失败，立即告知用户并停止审批项的生效承诺
+- 写入完成后，若用户后续测试的是 `curl` / `cat` / `ls` / `pip3` / `yt-dlp` / `agent-reach` 这类已在默认 allowlist 范围内的命令，不应再把它们当作“应该弹审批”的示例。
 - 若开启审批后要做读取/验收，优先一条命令一条命令执行；禁止把 `ls && cat`、多段 `;`、长管道等复合命令当成默认检查方式，避免连续触发多条审批。
 - 若审批提示的“Reply with”示例缺少 `<id>`，仍应以消息里显示的完整 `ID` 为准，使用 `/approve <full-id> allow-once` / `allow-always` / `deny`。
 - 若用户在审批弹窗后显得困惑、输入错误，或明确问“该怎么批”，必须直接回一条**可复制的完整命令**，例如：`/approve 49a500da-bd57-4458-a320-f1e65281f0d5 allow-once`。
