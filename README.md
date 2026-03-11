@@ -29,8 +29,8 @@
 3. Skills 推荐与安装
 - 默认直接展示推荐清单
 - 你点名要装哪个，AI 立刻执行安装
-- 包含：Youtube Clipper（以及“更多 Skills 扩展入口”）
-- 额外提供“更多 Skills 扩展入口”（两个 awesome 仓库链接）
+- 包含：Youtube Clipper、Agent Reach、Find Skills、OpenClaw Backup、OpenClaw Medical Skills
+- 同时直接展示两个生态仓库入口：`awesome-openclaw-usecases`、`awesome-openclaw-skills`
 
 4. 新渠道接入引导
 - 可以继续新增 Discord / Telegram / Feishu
