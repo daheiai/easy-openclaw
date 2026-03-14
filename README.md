@@ -71,3 +71,25 @@
 - OpenClaw Medical Skills：`https://github.com/FreedomIntelligence/OpenClaw-Medical-Skills`
 - Awesome OpenClaw Usecases：`https://github.com/hesamsheikh/awesome-openclaw-usecases`
 - Awesome OpenClaw Skills：`https://github.com/VoltAgent/awesome-openclaw-skills`
+
+## 常见问题（FAQ）
+
+1) **如果出现重大问题怎么办？**（比如程序直接崩溃、启动不起来、发消息不回等）
+
+答：优先尝试运行 `openclaw doctor --fix` 看能否自动修复。实在不行就用备份恢复：本 Skill 在流程开始时会建议你做一次全盘备份，并明确告诉你备份文件的保存路径；解压覆盖后即可回到改动前的状态。
+
+2) **如果我开了审批，结果 `cd` / `ls` 这样的命令都需要审批怎么办？**
+
+答：这是典型的“审批策略写得过严/放行列表没写全”导致的现象（常见原因是 agent 没按 Skill 约定写入宽松 allowlist，或者把策略理解错了）。虽然文档里有明确规定，但确实仍有人反馈会遇到。
+
+解决方案：
+- 方案 A：先按提示审批扛过这一波，等流程跑完后，让它修改配置把审批关闭。
+- 方案 B：按问题 1 的方式用备份重置回滚。
+
+3) **这个 Skill 支持最新版吗？**
+
+答：我目前测试通过了 `2.13` 和 `2.21` 以及 `3.8` 和 `3.12` 版；其中我自己测试了 20+ 遍，使用的模型为 `MiniMax M2.5`。因为这个 Skill 主要修改的是 OpenClaw 的配置文件，一般情况下配置格式不会频繁大改，我认为整体是通用的；如果未来出现兼容问题请联系我，我会继续维护。
+
+4) **有群或者交流方式吗？**
+
+答：有的。你可以点击 `https://daheiai.com` 查看我的更多项目，也可以在里面找到我们的交流群入口。
